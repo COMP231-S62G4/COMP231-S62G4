@@ -2,7 +2,20 @@
 <resources>
 
     <string name="app_name">WeMeet</string>
-    <string name="hello_world">Hello world!</string>
+    
+    <string  name="title_register">Register your device</string>
+    
+    <string name="action_send_location_sharing_request">Request location</string>
+    <string name="action_exit">Exit</string>
     <string name="action_settings">Settings</string>
+    
+    <string name="hint_phone_number">Enter your phone number</string>
+    
+    <string  name="btn_register">Register</string>
+    
+    <string-array name="arr_supported_countries">
+        <item>Canada +1</item>
+        <item>USA +1</item>
+    </string-array>
 
 </resources>
