@@ -1,0 +1,8 @@
+C:\Users\Dipen\Documents\Visual Studio 2013\Projects\WeMeetServiceLibrary\WeMeetService\bin\WeMeetService.dll.config
+C:\Users\Dipen\Documents\Visual Studio 2013\Projects\WeMeetServiceLibrary\WeMeetService\bin\WeMeetService.dll
+C:\Users\Dipen\Documents\Visual Studio 2013\Projects\WeMeetServiceLibrary\WeMeetService\bin\WeMeetService.pdb
+C:\Users\Dipen\Documents\Visual Studio 2013\Projects\WeMeetServiceLibrary\WeMeetService\bin\WeMeetServiceLibrary.dll
+C:\Users\Dipen\Documents\Visual Studio 2013\Projects\WeMeetServiceLibrary\WeMeetService\bin\WeMeetServiceLibrary.pdb
+C:\Users\Dipen\Documents\Visual Studio 2013\Projects\WeMeetServiceLibrary\WeMeetService\obj\Debug\WeMeetService.csprojResolveAssemblyReference.cache
+C:\Users\Dipen\Documents\Visual Studio 2013\Projects\WeMeetServiceLibrary\WeMeetService\obj\Debug\WeMeetService.dll
+C:\Users\Dipen\Documents\Visual Studio 2013\Projects\WeMeetServiceLibrary\WeMeetService\obj\Debug\WeMeetService.pdb
