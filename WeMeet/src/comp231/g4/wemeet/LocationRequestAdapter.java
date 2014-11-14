@@ -61,5 +61,89 @@ public class LocationRequestAdapter extends ArrayAdapter<Contact> implements
 		return view;
 	}
 
-	
+	@Override
+	public void onClick(final View v) {
+		final String phoneNumber = PreferenceManager
+				.getDefaultSharedPreferences(v.getContext()).getString(
+						MainActivity.KEY_PHONE_NUMBER, "16472787694");
+
+		// getting top parent view
+		final View parent = (View) v.getParent().getParent();
+
+		// for debug purpose
+		// Toast.makeText(getContext(),
+		// ((TextView)parent.findViewById(R.id.tvName)).getText(),
+		// Toast.LENGTH_SHORT).show();
+
+		// getting position of view
+		int position = _lvContacts.getPositionForView(parent);
+
+		// getting contact to remove
+		final Contact contact = getItem(position);
+
+		// getting phone number of the contact that sent request
+		final String fromPhoneNumber = ((TextView) parent
+				.findViewById(R.id.tvPhone)).getText().toString();
+
+		final boolean status; // setting variable to decide method to call
+		switch (v.getId()) {
+		case R.id.btnDelete:
+			status = false;
+			break;
+		default:
+			return;
+		}
+
+		// disabling UI
+		parent.setEnabled(false);
+
+		Thread t = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				try{
+				AndroidClient client = new AndroidClient();
+
+				final boolean dataUpdated;
+
+				if (status) {
+					dataUpdated = client.AcceptLocationSharingRequest(
+							fromPhoneNumber, phoneNumber);
+
+				} else {
+					dataUpdated = client.DeleteLocationSharingRequest(
+							fromPhoneNumber, phoneNumber);
+				}
+
+				_activity.runOnUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+						String msg ="";
+						if (dataUpdated) {
+							// removing contact if status is updated on
+							// server
+							remove(contact);
+							
+							if(!status){
+								msg = "Request deleted.";
+							}
+						}
+						else{
+							msg= "Unable to connect!";
+						}
+						Toast.makeText(_activity, msg,
+								Toast.LENGTH_SHORT).show();
+					}
+				});
+				}catch (Exception e) {
+					Log.e("WeMeet_Exception", e.getMessage());
+				}
+			}
+		});
+
+		// starting thread
+		t.start();
+	}
+
 }
