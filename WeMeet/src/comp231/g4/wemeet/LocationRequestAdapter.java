@@ -87,6 +87,9 @@ public class LocationRequestAdapter extends ArrayAdapter<Contact> implements
 
 		final boolean status; // setting variable to decide method to call
 		switch (v.getId()) {
+		case R.id.btnAccept:
+			status = true;
+			break;
 		case R.id.btnDelete:
 			status = false;
 			break;
@@ -125,7 +128,9 @@ public class LocationRequestAdapter extends ArrayAdapter<Contact> implements
 							// server
 							remove(contact);
 							
-							if(!status){
+							if(status){
+								msg = "Request accepted.";
+							}else{
 								msg = "Request deleted.";
 							}
 						}
