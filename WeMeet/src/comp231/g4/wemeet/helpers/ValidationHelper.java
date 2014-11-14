@@ -15,4 +15,12 @@ public class ValidationHelper {
 
 		return true;
 	}
+	
+	public static String SanitizePhoneNumber(String phoneNumber) {
+		phoneNumber = phoneNumber.replace(" ", "");
+		phoneNumber = phoneNumber.replace("-", "");
+		phoneNumber = phoneNumber.replace("+", "");
+		
+		return phoneNumber;
+	}
 }
