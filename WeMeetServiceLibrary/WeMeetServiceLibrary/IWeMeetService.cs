@@ -60,6 +60,14 @@ namespace WeMeetServiceLibrary
         List<string> GetGroupMembers(string phoneNumber, string groupName);
 
         [OperationContract]
+        [WebInvoke(UriTemplate = "IsRequestSentTo/{fromPhoneNumber}/{toPhoneNumber}", Method = "GET")]
+        bool IsRequestSentTo(string fromPhoneNumber, string toPhoneNumber);
+
+        [OperationContract]
+        [WebInvoke(UriTemplate = "GetLocationRequests/{phoneNumber}", Method = "GET")]
+        List<string> GetLocationRequests(string phoneNumber);
+
+        [OperationContract]
         [WebInvoke(UriTemplate = "SendLocationSharingRequest/{fromPhoneNumber}/{toPhoneNumber}", Method = "GET")]
         bool SendLocationSharingRequest(string fromPhoneNumber, string toPhoneNumber);
 
@@ -68,8 +76,8 @@ namespace WeMeetServiceLibrary
         bool AcceptLocationSharingRequest(string fromPhoneNumber, string toPhoneNumber);
 
         [OperationContract]
-        [WebInvoke(UriTemplate = "DeclineLocationSharingRequest/{fromPhoneNumber}/{toPhoneNumber}", Method = "GET")]
-        bool DeclineLocationSharingRequest(string fromPhoneNumber, string toPhoneNumber);
+        [WebInvoke(UriTemplate = "DeleteLocationSharingRequest/{fromPhoneNumber}/{toPhoneNumber}", Method = "GET")]
+        bool DeleteLocationSharingRequest(string fromPhoneNumber, string toPhoneNumber);
 
         [OperationContract]
         [WebInvoke(UriTemplate = "GetFriendsNearBy/{phoneNumber}", Method = "GET")]

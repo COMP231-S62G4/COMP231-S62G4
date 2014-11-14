@@ -132,7 +132,7 @@ namespace WeMeetServiceLibrary
             };
         }
 
-        public bool SendLocationSharingRequest(string fromPhoneNumber, string toPhoneNumber)
+       public bool SendLocationSharingRequest(string fromPhoneNumber, string toPhoneNumber)
         {
             connectionManager = new ConnectionManager(ConfigurationManager.ConnectionStrings["WeMeetDb"].ConnectionString);
             connectionManager.Open();
@@ -157,12 +157,88 @@ namespace WeMeetServiceLibrary
 
         public bool AcceptLocationSharingRequest(string fromPhoneNumber, string toPhoneNumber)
         {
-            throw new NotImplementedException();
+            connectionManager = new ConnectionManager(ConfigurationManager.ConnectionStrings["WeMeetDb"].ConnectionString);
+            connectionManager.Open();
+            SqlCommand cmd;
+            SqlDataReader sdr;
+            string fromList = null, toList = null;
+
+            cmd = new SqlCommand("spGetSharedLocationList", connectionManager.con);
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            //fetching shared location list doe both of the numbers
+            cmd.Parameters.Add(new SqlParameter("@PhoneNumber", fromPhoneNumber));
+            sdr = cmd.ExecuteReader();
+            if (sdr.HasRows)
+            {
+                sdr.Read();
+                fromList = sdr[0].ToString();
+                sdr.Close();
+            }
+
+            cmd = new SqlCommand("spGetSharedLocationList", connectionManager.con);
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.Add(new SqlParameter("@PhoneNumber", fromPhoneNumber));
+            sdr = cmd.ExecuteReader();
+            if (sdr.HasRows)
+            {
+                sdr.Read();
+                toList = sdr[0].ToString();
+                sdr.Close();
+            }
+
+            //addinf phone numbers to shared list
+            if (!fromList.Contains(toPhoneNumber))
+            {
+                cmd = new SqlCommand("spAddToSharedLocationList", connectionManager.con);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.Add(new SqlParameter("@RequesterPhoneNumber", fromPhoneNumber));
+                cmd.Parameters.Add(new SqlParameter("@SharedPhoneNumber", toPhoneNumber));
+
+                cmd.ExecuteNonQuery();
+            }
+            if (!toList.Contains(fromPhoneNumber))
+            {
+                cmd = new SqlCommand("spAddToSharedLocationList", connectionManager.con);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.Add(new SqlParameter("@RequesterPhoneNumber", toPhoneNumber));
+                cmd.Parameters.Add(new SqlParameter("@SharedPhoneNumber", fromPhoneNumber));
+
+                cmd.ExecuteNonQuery();
+            }
+
+            //removing request
+            bool result = DeleteLocationSharingRequest(fromPhoneNumber, toPhoneNumber);
+
+            connectionManager.Close();
+
+            return result;
         }
 
-        public bool DeclineLocationSharingRequest(string fromPhoneNumber, string toPhoneNumber)
+        public bool DeleteLocationSharingRequest(string fromPhoneNumber, string toPhoneNumber)
         {
-            throw new NotImplementedException();
+            connectionManager = new ConnectionManager(ConfigurationManager.ConnectionStrings["WeMeetDb"].ConnectionString);
+            connectionManager.Open();
+
+            SqlCommand cmd = new SqlCommand("spDeleteLocationSharingRequest", connectionManager.con);
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+            cmd.Parameters.Add(new SqlParameter("@FromPhoneNumber", fromPhoneNumber));
+            cmd.Parameters.Add(new SqlParameter("@ToPhoneNumber", toPhoneNumber));
+
+            SqlParameter retval = cmd.Parameters.Add("@ret_val", System.Data.SqlDbType.Int);
+            retval.Direction = ParameterDirection.ReturnValue;
+
+            cmd.ExecuteNonQuery();
+
+            int result = (int)cmd.Parameters["@ret_val"].Value;
+
+            connectionManager.Close();
+
+            return result > 0;
         }
 
         public List<NearBy> GetFriendsNearBy(string phoneNumber)
