@@ -16,69 +16,90 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.util.Log;
+
 import com.google.android.gms.maps.model.LatLng;
 
 
 public class AndroidClient {
-	private static final String baseURL = "http://192.168.0.109/WeMeetService/WeMeetService.svc/json/";
+	private static final String baseURL = "http://192.168.0.100/WeMeetService/WeMeetService.svc/json/";
 
-	public boolean RegisterPhoneNumber(String phoneNumber) {
+	public boolean RegisterPhoneNumber(String phoneNumber) throws Exception{
 		return Boolean
 				.parseBoolean(GetData(baseURL + "Register/" + phoneNumber)
 						.toString());
 	}
 
-	public boolean IsRegisteredPhoneNumber(String phoneNumber) {
+	public boolean IsRegisteredPhoneNumber(String phoneNumber) throws Exception{
 
 		return Boolean.parseBoolean(GetData(
 				baseURL + "IsRegistered/" + phoneNumber).toString());
 	}
 
-	public boolean UnRegisterPhoneNumber(String phoneNumber) {
+	public boolean UnRegisterPhoneNumber(String phoneNumber) throws Exception{
 
 		return Boolean.parseBoolean(GetData(
 				baseURL + "UnRegister/" + phoneNumber).toString());
 	}
 
-	boolean UpdateLocation(String phoneNumber, String latitude, String longitude) {
+	public boolean UpdateLocation(String phoneNumber, String latitude, String longitude)throws Exception {
 		return Boolean.parseBoolean(GetData(
 				baseURL + "UpdateLocation/" + phoneNumber + "/" + latitude
 						+ "/" + longitude).toString());
 	}
+	
+	public List<String> GetLocationRequests(String phoneNumber) throws JSONException, Exception{
+		ArrayList<String> phoneNumbers = new ArrayList<String>();
+		
+		JSONArray array = new JSONArray(GetData(
+				baseURL + "GetLocationRequests/" +
+						phoneNumber).toString());
+		for(int i=0;i<array.length();i++)
+			phoneNumbers.add(array.getString(i));
+		
+		return phoneNumbers;
+	}
 
-	LatLng GetLocation(String requesterPhoneNumber, String phoneNumber)
-			throws JSONException {
+	public LatLng GetLocation(String requesterPhoneNumber, String phoneNumber)
+			throws JSONException, Exception {
 		JSONObject object = new JSONObject(GetData(
 				baseURL + "GetLocation/" + requesterPhoneNumber + "/"
 						+ phoneNumber).toString());
 
-		return new LatLng(Double.parseDouble(object.getString("latitude")),
-				Double.parseDouble(object.getString("latitude")));
+		return new LatLng(Double.parseDouble(object.getString("Latitude")),
+				Double.parseDouble(object.getString("Longitude")));
 	}
 
-	boolean SendLocationSharingRequest(String fromPhoneNumber,
-			String toPhoneNumber) {
+	public boolean IsRequestSentTo(String fromPhoneNumber,
+			String toPhoneNumber) throws Exception{
+		return Boolean.parseBoolean(GetData(
+				baseURL + "IsRequestSentTo/" + fromPhoneNumber + "/"
+						+ toPhoneNumber).toString());
+	}
+	
+	public boolean SendLocationSharingRequest(String fromPhoneNumber,
+			String toPhoneNumber) throws Exception{
 		return Boolean.parseBoolean(GetData(
 				baseURL + "SendLocationSharingRequest/" + fromPhoneNumber + "/"
 						+ toPhoneNumber).toString());
 	}
 
-	boolean AcceptLocationSharingRequest(String fromPhoneNumber,
-			String toPhoneNumber) {
+	public boolean AcceptLocationSharingRequest(String fromPhoneNumber,
+			String toPhoneNumber) throws Exception{
 		return Boolean.parseBoolean(GetData(
 				baseURL + "AcceptLocationSharingRequest/" + fromPhoneNumber
 						+ "/" + toPhoneNumber).toString());
 	}
 
-	boolean DeclineLocationSharingRequest(String fromPhoneNumber,
-			String toPhoneNumber) {
+	public boolean DeleteLocationSharingRequest(String fromPhoneNumber,
+			String toPhoneNumber) throws Exception{
 		return Boolean.parseBoolean(GetData(
-				baseURL + "DeclineLocationSharingRequest/" + fromPhoneNumber
+				baseURL + "DeleteLocationSharingRequest/" + fromPhoneNumber
 						+ "/" + toPhoneNumber).toString());
 
 	}
 
-	public JSONArray GetFriendsNearBy(String phoneNumber) {
+	public JSONArray GetFriendsNearBy(String phoneNumber)  throws Exception{
 		JSONArray array = null;
 		try {
 			array = new JSONArray(GetData(
@@ -90,7 +111,7 @@ public class AndroidClient {
 		return array;
 	}
 
-	private Object GetData(String url) {
+	private Object GetData(String url) throws Exception {
 		try {
 			DefaultHttpClient httpClient = new DefaultHttpClient();
 			HttpGet request = new HttpGet(url);
@@ -101,17 +122,18 @@ public class AndroidClient {
 			return EntityUtils.toString(entity);
 
 		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-
+			Log.e("WeMeet_Exception", e.getMessage());
+			throw e;
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.e("WeMeet_Exception", e.getMessage());
+			throw e;
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.e("WeMeet_Exception", e.getMessage());
+			throw e;
 		} catch (Exception e) {
-			e.printStackTrace();
+			Log.e("WeMeet_Exception", e.getMessage());
+			throw e;
 		}
-		return "";
 	}
 
 	void CreateGroup(String phoneNumber, String groupName) {
