@@ -56,7 +56,7 @@ namespace WeMeetServiceLibrary
             return result > 0;
         }
 
-        public bool UnRegisterPhoneNumber(string phoneNumber)
+         public bool UnRegisterPhoneNumber(string phoneNumber)
         {
             connectionManager = new ConnectionManager(ConfigurationManager.ConnectionStrings["WeMeetDb"].ConnectionString);
             connectionManager.Open();
