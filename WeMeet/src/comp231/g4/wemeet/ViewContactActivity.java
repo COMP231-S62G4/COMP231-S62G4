@@ -65,6 +65,72 @@ public class ViewContactActivity extends Activity {
 
 		RegisteredContactsDataSource dsRegisteredContacts = new RegisteredContactsDataSource(
 				this);
+		dsRegisteredContacts.open();
+		registeredContact = dsRegisteredContacts.exists(contact);
+		dsRegisteredContacts.close();
+
+		map = ((MapFragment) getFragmentManager()
+				.findFragmentById(R.id.map)).getMap();
+		if (registeredContact != null) {
+			map.setMyLocationEnabled(false);
+			map.getUiSettings().setZoomControlsEnabled(true);
+			map.getUiSettings().setZoomGesturesEnabled(false);
+		}
+		else{
+			((MapFragment) getFragmentManager()
+					.findFragmentById(R.id.map)).getView().setVisibility(View.GONE);
 		}
 
+		// load contact on map
+		loadContact();
+	}
+
+	private void loadContact() {
+		Thread t = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				if (map != null) {
+					new Handler(Looper.getMainLooper()).post(new Runnable() {
+
+						@Override
+						public void run() {
+							map.clear();// clearing map
+						}
+					});
+
+					try {
+						AndroidClient client = new AndroidClient();
+						SharedPreferences prefs = PreferenceManager
+								.getDefaultSharedPreferences(ViewContactActivity.this
+										.getApplicationContext());
+						LatLng position = client.GetLocation(prefs.getString(
+								MainActivity.KEY_PHONE_NUMBER, ""),
+								ValidationHelper.SanitizePhoneNumber(registeredContact.numbers.get(0).number));
+
+						final MarkerOptions marker = new MarkerOptions();
+						marker.position(position);
+						marker.title(registeredContact.name);
+
+						Handler handler = new Handler(Looper.getMainLooper());
+						handler.post(new Runnable() {
+
+							@Override
+							public void run() {
+								map.addMarker(marker);
+								Log.e("Marker adder", marker.getTitle());
+							}
+						});
+
+					} catch (Exception e) {
+						Log.e("WeMeet_Exception", "");
+					}
+				}
+
+			}
+		});
+
+		t.start();
+	}
 }
