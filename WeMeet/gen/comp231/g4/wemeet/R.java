@@ -454,6 +454,7 @@ containing a value of this type.
         public static final int lvPhoneNumbers=0x7f070024;
         public static final int map=0x7f07001c;
         public static final int match_parent=0x7f07000c;
+        public static final int menu_item_invite=0x7f070030;
         public static final int menu_item_share_location=0x7f07002f;
         public static final int menu_item_view_contact=0x7f07002e;
         public static final int monochrome=0x7f070013;

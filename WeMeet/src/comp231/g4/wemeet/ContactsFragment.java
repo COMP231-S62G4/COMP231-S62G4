@@ -9,13 +9,17 @@ import comp231.g4.wemeet.helpers.ValidationHelper;
 import comp231.g4.wemeet.model.Contact;
 import comp231.g4.wemeet.servicehelper.AndroidClient;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Fragment;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -31,18 +35,19 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class ContactsFragment extends Fragment {
+public class ContactsFragment extends Fragment implements OnClickListener {
 	public static final String DATA_CONTACT_ID = "CONTACT_ID";
 	public static final String DATA_CONTACT_NAME = "CONTACT_NAME";
 	public static final String DATA_CONTACT_PHONE_NUMBERS = "CONTACT_PHONE_NUMBERS";
-	
+
 	private ImageButton imgbtnSearch;
 	private EditText etSearch;
 	private ListView lvContacts;
 	private ArrayList<Contact> contacts;
 	private ArrayList<Contact> listContacts;
 	private Dialog dialogLoading;
-	
+	private AlertDialog dialogInvitation;
+
 	private Contact currentContact = null;
 	private Contact currentRegisteredContact = null;
 
@@ -73,6 +78,13 @@ public class ContactsFragment extends Fragment {
 		dialogLoading.setCancelable(false);
 		dialogLoading.show();
 
+		dialogInvitation = new AlertDialog.Builder(getActivity())
+				.setTitle("Send Invitation")
+				.setMessage("Are you sure you want to send invitation SMS?")
+				.create();
+		dialogInvitation.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel", this);
+		dialogInvitation.setButton(AlertDialog.BUTTON_POSITIVE, "OK", this);
+
 		// setting on clink listener for search button
 		imgbtnSearch = (ImageButton) getActivity().findViewById(R.id.btnSearch);
 		imgbtnSearch.setOnClickListener(new View.OnClickListener() {
@@ -92,7 +104,8 @@ public class ContactsFragment extends Fragment {
 					for (int i = 0; i < contacts.size(); i++) {
 						Contact contact = contacts.get(i);
 
-						if (contact.name.toLowerCase().contains(query.toLowerCase()))
+						if (contact.name.toLowerCase().contains(
+								query.toLowerCase()))
 							listContacts.add(contact);
 					}
 				}
@@ -132,7 +145,7 @@ public class ContactsFragment extends Fragment {
 				contacts = new ContactFetcher(getActivity()).fetchAll();
 
 				listContacts = new ArrayList<Contact>(contacts);
-				
+
 				getActivity().runOnUiThread(new Runnable() {
 
 					@Override
@@ -162,25 +175,29 @@ public class ContactsFragment extends Fragment {
 			ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 
-		//checking for registration status for selected contact
+		// checking for registration status for selected contact
 		RegisteredContactsDataSource dsRegisteredContacts = new RegisteredContactsDataSource(
 				getActivity());
-		
-		currentContact = listContacts.get(((AdapterContextMenuInfo)menuInfo).position);
-		
+
+		currentContact = listContacts
+				.get(((AdapterContextMenuInfo) menuInfo).position);
+
 		dsRegisteredContacts.open();
 
 		MenuInflater inflater = getActivity().getMenuInflater();
 		inflater.inflate(R.menu.menu_contacts, menu);
 
 		menu.setHeaderTitle(currentContact.name);
-		
-		//removing share location menu item if contact is not registered with WeMeet
+
+		// removing share location menu item if contact is not registered with
+		// WeMeet
 		currentRegisteredContact = dsRegisteredContacts.exists(currentContact);
-		if (currentRegisteredContact==null) {
+		if (currentRegisteredContact == null) {
 			menu.removeItem(R.id.menu_item_share_location);
+		} else {
+			menu.removeItem(R.id.menu_item_invite);
 		}
-		//closing database connection
+		// closing database connection
 		dsRegisteredContacts.close();
 	};
 
@@ -191,17 +208,20 @@ public class ContactsFragment extends Fragment {
 			Intent i = new Intent(getActivity(), ViewContactActivity.class);
 			i.putExtra(DATA_CONTACT_ID, currentContact.id);
 			i.putExtra(DATA_CONTACT_NAME, currentContact.name);
-			
+
 			ArrayList<String> phoneNumbers = new ArrayList<String>();
-			for(int j=0;j<currentContact.numbers.size();j++){
+			for (int j = 0; j < currentContact.numbers.size(); j++) {
 				phoneNumbers.add(currentContact.numbers.get(j).number);
 			}
-			
+
 			i.putStringArrayListExtra(DATA_CONTACT_PHONE_NUMBERS, phoneNumbers);
 			startActivity(i);
 			break;
+		case R.id.menu_item_invite:
+			dialogInvitation.show();
+			break;
 		case R.id.menu_item_share_location:
-			if(currentRegisteredContact!=null){
+			if (currentRegisteredContact != null) {
 				shareLocation(currentRegisteredContact);
 			}
 		default:
@@ -211,45 +231,52 @@ public class ContactsFragment extends Fragment {
 	}
 
 	private void shareLocation(final Contact contact) {
-		
-		Thread t =new Thread(new Runnable() {
-			
+
+		Thread t = new Thread(new Runnable() {
+
 			@Override
 			public void run() {
 				boolean result = false;
-				try{
+				try {
 					AndroidClient client = new AndroidClient();
-					
-					SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
-					String fromPhoneNumber = prefs.getString(MainActivity.KEY_PHONE_NUMBER, "");
-					
-					result = client.SendLocationSharingRequest(fromPhoneNumber,ValidationHelper.SanitizePhoneNumber(contact.numbers.get(0).number));
-				}catch (Exception e) {
+
+					SharedPreferences prefs = PreferenceManager
+							.getDefaultSharedPreferences(getActivity()
+									.getApplicationContext());
+					String fromPhoneNumber = prefs.getString(
+							MainActivity.KEY_PHONE_NUMBER, "");
+
+					result = client
+							.SendLocationSharingRequest(
+									fromPhoneNumber,
+									ValidationHelper
+											.SanitizePhoneNumber(contact.numbers
+													.get(0).number));
+				} catch (Exception e) {
 					Log.e("WeMeet_Exception", e.getMessage());
 					result = false;
-				}
-				finally{
+				} finally {
 					final String msg;
-					
-					if(result)
-					{
+
+					if (result) {
 						msg = "Request sent.";
-					}
-					else{
+					} else {
 						msg = "Unable to send request!";
 					}
-					
+
 					getActivity().runOnUiThread(new Runnable() {
 						public void run() {
-							Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
+							Toast.makeText(getActivity(), msg,
+									Toast.LENGTH_SHORT).show();
 						}
 					});
 				}
-				
+
 			}
 		});
-		
-		t.start();//starting thread
-		
+
+		t.start();// starting thread
+
 	}
+
 }

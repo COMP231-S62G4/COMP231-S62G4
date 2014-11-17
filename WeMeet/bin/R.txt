@@ -135,6 +135,7 @@ int id lvContacts 0x7f070017
 int id lvPhoneNumbers 0x7f070024
 int id map 0x7f07001c
 int id match_parent 0x7f07000c
+int id menu_item_invite 0x7f070030
 int id menu_item_share_location 0x7f07002f
 int id menu_item_view_contact 0x7f07002e
 int id monochrome 0x7f070013
