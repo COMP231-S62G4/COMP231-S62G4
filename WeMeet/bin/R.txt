@@ -220,6 +220,7 @@ int string msg_deleting_account 0x7f05002f
 int string msg_wait 0x7f050030
 int string store_picture_message 0x7f050001
 int string store_picture_title 0x7f050000
+int string str_invitation 0x7f050035
 int string title_connecting_server 0x7f050026
 int string title_deleting_Account 0x7f050025
 int string title_loading_contacts 0x7f050027

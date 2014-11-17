@@ -618,6 +618,7 @@ containing a value of this type.
         public static final int msg_wait=0x7f050030;
         public static final int store_picture_message=0x7f050001;
         public static final int store_picture_title=0x7f050000;
+        public static final int str_invitation=0x7f050035;
         public static final int title_connecting_server=0x7f050026;
         public static final int title_deleting_Account=0x7f050025;
         public static final int title_loading_contacts=0x7f050027;

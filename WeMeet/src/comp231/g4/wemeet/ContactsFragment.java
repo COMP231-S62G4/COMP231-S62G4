@@ -1,7 +1,6 @@
 package comp231.g4.wemeet;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import comp231.g4.wemeet.helpers.ContactFetcher;
 import comp231.g4.wemeet.helpers.RegisteredContactsDataSource;
@@ -279,4 +278,30 @@ public class ContactsFragment extends Fragment implements OnClickListener {
 
 	}
 
+	@Override
+	public void onClick(DialogInterface dialog, int which) {
+		if (currentContact == null)
+			return;
+
+		switch (which) {
+		case AlertDialog.BUTTON_POSITIVE:
+			try {
+				SmsManager manager = SmsManager.getDefault();
+				manager.sendTextMessage(currentContact.numbers.get(0).number, null, getString(R.string.str_invitation), null,
+						null);
+
+				Toast.makeText(getActivity(), "Invitation sent.",
+						Toast.LENGTH_SHORT).show();
+
+			} catch (Exception e) {
+				Toast.makeText(getActivity(), "Unable to send invitation.",
+						Toast.LENGTH_SHORT).show();
+			}
+			break;
+
+		default:
+			break;
+		}
+
+	}
 }

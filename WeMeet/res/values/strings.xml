@@ -30,6 +30,8 @@
         \nYou want be able to get back your data once you delete it.
     </string>
     
+    <string name="str_invitation">You are invited to install WeMeet application.</string>
+    
     <string-array name="arr_supported_countries">
         <item>Canada +1</item>
         <item>USA +1</item>
