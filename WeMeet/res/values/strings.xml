@@ -41,6 +41,7 @@
         <item>Friends Nearby</item>
         <item>Contacts</item>
         <item>Location Requests</item>
+        <item>Groups</item>
         <item>Delete Account</item>
     </string-array>
     
@@ -48,6 +49,7 @@
         <item>@drawable/ic_friends_nearby</item>
         <item>@drawable/ic_contacts_details</item>
         <item>@drawable/ic_location_request</item>
+        <item>@drawable/ic_groups</item>
         <item>@drawable/ic_delete_account</item>
     </array>
 </resources>
