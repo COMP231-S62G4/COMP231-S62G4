@@ -3,6 +3,7 @@ package comp231.g4.wemeet;
 import java.util.ArrayList;
 
 import comp231.g4.wemeet.helpers.ContactFetcher;
+import comp231.g4.wemeet.helpers.InvitationDataSource;
 import comp231.g4.wemeet.helpers.RegisteredContactsDataSource;
 import comp231.g4.wemeet.helpers.ValidationHelper;
 import comp231.g4.wemeet.model.Contact;
@@ -287,12 +288,20 @@ public class ContactsFragment extends Fragment implements OnClickListener {
 		case AlertDialog.BUTTON_POSITIVE:
 			try {
 				SmsManager manager = SmsManager.getDefault();
-				manager.sendTextMessage(currentContact.numbers.get(0).number, null, getString(R.string.str_invitation), null,
-						null);
+				manager.sendTextMessage(currentContact.numbers.get(0).number,
+						null, getString(R.string.str_invitation), null, null);
 
 				Toast.makeText(getActivity(), "Invitation sent.",
 						Toast.LENGTH_SHORT).show();
 
+				InvitationDataSource dsInvitation = new InvitationDataSource(
+						getActivity());
+				dsInvitation.open();
+
+				dsInvitation.addContact(currentContact.name,
+						currentContact.numbers.get(0).number);
+
+				dsInvitation.close();
 			} catch (Exception e) {
 				Toast.makeText(getActivity(), "Unable to send invitation.",
 						Toast.LENGTH_SHORT).show();
