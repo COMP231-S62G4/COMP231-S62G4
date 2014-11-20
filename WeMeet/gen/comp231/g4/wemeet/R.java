@@ -428,10 +428,11 @@ containing a value of this type.
         public static final int powered_by_google_light=0x7f02002b;
     }
     public static final class id {
-        public static final int action_exit=0x7f07002f;
-        public static final int action_send_location_sharing_request=0x7f07002e;
+        public static final int action_exit=0x7f070031;
+        public static final int action_send_location_sharing_request=0x7f070030;
         public static final int book_now=0x7f070010;
-        public static final int btnAccept=0x7f07002d;
+        public static final int btnAccept=0x7f07002f;
+        public static final int btnAdd=0x7f070029;
         public static final int btnCancel=0x7f07001a;
         public static final int btnDelete=0x7f07001b;
         public static final int btnSearch=0x7f070016;
@@ -442,13 +443,14 @@ containing a value of this type.
         public static final int classic=0x7f070011;
         public static final int content_frame=0x7f07001f;
         public static final int drawer_layout=0x7f07001e;
+        public static final int etName=0x7f070028;
         public static final int etPhoneNumber=0x7f070022;
         public static final int etSearch=0x7f070015;
         public static final int grayscale=0x7f070012;
         public static final int holo_dark=0x7f070005;
         public static final int holo_light=0x7f070006;
         public static final int hybrid=0x7f070004;
-        public static final int icon=0x7f070028;
+        public static final int icon=0x7f07002a;
         public static final int left_drawer=0x7f070020;
         public static final int llSearchBar=0x7f070014;
         public static final int lvContacts=0x7f070017;
@@ -456,9 +458,9 @@ containing a value of this type.
         public static final int lvPhoneNumbers=0x7f070025;
         public static final int map=0x7f07001c;
         public static final int match_parent=0x7f07000c;
-        public static final int menu_item_invite=0x7f070032;
-        public static final int menu_item_share_location=0x7f070031;
-        public static final int menu_item_view_contact=0x7f070030;
+        public static final int menu_item_invite=0x7f070034;
+        public static final int menu_item_share_location=0x7f070033;
+        public static final int menu_item_view_contact=0x7f070032;
         public static final int monochrome=0x7f070013;
         public static final int none=0x7f070000;
         public static final int normal=0x7f070001;
@@ -470,13 +472,13 @@ containing a value of this type.
         public static final int spinner_country_code=0x7f070021;
         public static final int strict_sandbox=0x7f070009;
         public static final int terrain=0x7f070003;
-        public static final int title=0x7f070029;
+        public static final int title=0x7f07002b;
         public static final int tvContactName=0x7f070024;
         public static final int tvDetails=0x7f070019;
-        public static final int tvGroupName=0x7f07002c;
+        public static final int tvGroupName=0x7f07002e;
         public static final int tvMessage=0x7f070027;
-        public static final int tvName=0x7f07002a;
-        public static final int tvPhone=0x7f07002b;
+        public static final int tvName=0x7f07002c;
+        public static final int tvPhone=0x7f07002d;
         public static final int tvTitle=0x7f070018;
         public static final int wrap_content=0x7f07000d;
     }
@@ -493,10 +495,11 @@ containing a value of this type.
         public static final int activity_user_profile=0x7f030006;
         public static final int activity_view_contact=0x7f030007;
         public static final int dialog_loading=0x7f030008;
-        public static final int drawer_list_item=0x7f030009;
-        public static final int list_item_contact=0x7f03000a;
-        public static final int list_item_groups=0x7f03000b;
-        public static final int list_item_location_request=0x7f03000c;
+        public static final int dialog_single_text=0x7f030009;
+        public static final int drawer_list_item=0x7f03000a;
+        public static final int list_item_contact=0x7f03000b;
+        public static final int list_item_groups=0x7f03000c;
+        public static final int list_item_location_request=0x7f03000d;
     }
     public static final class menu {
         public static final int main=0x7f0b0000;

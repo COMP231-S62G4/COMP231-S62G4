@@ -46,7 +46,7 @@ public class GroupsDataSource {
 		
 		ContentValues values = new ContentValues();
 		values.put(COL_ID, groupId);
-		values.put(COL_NAME, name);
+		values.put(COL_NAME, name.trim());
 
 		long id = database.insert(TABLE_GROUPS, null, values);
 		return id > 0;
@@ -59,7 +59,7 @@ public class GroupsDataSource {
 
 	public boolean exists(String name) {
 		Cursor c = database.rawQuery("select * from " + TABLE_GROUPS
-				+ " where " + COL_NAME + "='" + name + "'", null);
+				+ " where " + COL_NAME + "='" + name.trim() + "'", null);
 		if (c.moveToFirst()) {
 			c.close();// closing cursor
 			return true;
