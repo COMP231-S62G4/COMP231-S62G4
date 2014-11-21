@@ -20,6 +20,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		// TODO Auto-generated method stub
 		db.execSQL(RegisteredContactsDataSource.CREATE_REGISTERED_CONTACTS);
 		db.execSQL(InvitationDataSource.CREATE_INVITATIONS);
+		db.execSQL(GroupsDataSource.CREATE_GROUPS);
 	}
 
 	@Override

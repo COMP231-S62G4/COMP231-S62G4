@@ -26,11 +26,13 @@ public class GroupsAdapter extends ArrayAdapter<Group> {
 		View view = convertView;
 		if (view == null) {
 			LayoutInflater inflater = LayoutInflater.from(getContext());
-			view = inflater.inflate(android.R.layout.activity_list_item, parent, false);
+			view = inflater.inflate(android.R.layout.simple_list_item_1, parent, false);
+			
+			// Populate the data into the template view using the data object
+			//TextView tvName = (TextView) view.findViewById(android.R.layout.simple_list_item_1);
+			TextView tvName = (TextView) view;
+			tvName.setText(group.name);
 		}
-		// Populate the data into the template view using the data object
-		TextView tvName = (TextView) view.findViewById(android.R.layout.simple_list_item_1);
-		tvName.setText(group.name);
 		return view;
 	}
 }

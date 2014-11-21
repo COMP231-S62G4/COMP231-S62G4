@@ -132,6 +132,7 @@ int id holo_dark 0x7f070005
 int id holo_light 0x7f070006
 int id hybrid 0x7f070004
 int id icon 0x7f07002a
+int id item_add_group 0x7f070035
 int id left_drawer 0x7f070020
 int id llSearchBar 0x7f070014
 int id lvContacts 0x7f070017
@@ -180,6 +181,7 @@ int layout list_item_location_request 0x7f03000d
 int menu main 0x7f0b0000
 int menu menu_contacts 0x7f0b0001
 int menu menu_exit 0x7f0b0002
+int menu menu_groups 0x7f0b0003
 int string accept 0x7f050002
 int string action_exit 0x7f050029
 int string action_send_location_sharing_request 0x7f050028

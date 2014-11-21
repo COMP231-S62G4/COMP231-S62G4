@@ -55,7 +55,7 @@ public class WeMeetService extends Service implements LocationListener {
 		// hide the notification after its selected
 		notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
-		notificationManager.notify(NOTIFICATION_ID, notification);
+		//notificationManager.notify(NOTIFICATION_ID, notification);
 
 		if (!syncedToday()) {
 			syncContacts(); // syncing contacts
@@ -163,7 +163,7 @@ public class WeMeetService extends Service implements LocationListener {
 				// hide the notification after its selected
 				notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
-				notificationManager.notify(NOTIFICATION_ID, notification);
+				//notificationManager.notify(NOTIFICATION_ID, notification);
 			}
 		});
 
@@ -214,7 +214,7 @@ public class WeMeetService extends Service implements LocationListener {
 	public void onLocationChanged(final Location location) {
 		UpdateLocation(location);
 
-		ShowLocUpdateNotification(location);
+		//ShowLocUpdateNotification(location);
 	}
 
 	private void ShowLocUpdateNotification(final Location location) {

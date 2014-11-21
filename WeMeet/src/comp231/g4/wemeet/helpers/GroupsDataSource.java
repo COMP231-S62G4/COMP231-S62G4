@@ -18,7 +18,7 @@ public class GroupsDataSource {
 	public static final String COL_NAME = "NAME";
 
 	public static final String CREATE_GROUPS = "CREATE TABLE " + TABLE_GROUPS
-			+ "(" + COL_ID + " integer primary key," + COL_NAME
+			+ "(" + COL_ID + " integer primary key autoincrement," + COL_NAME
 			+ " text not null)";
 
 	private String[] allColumns = { COL_ID, COL_NAME };
@@ -32,7 +32,7 @@ public class GroupsDataSource {
 	}
 
 	public void close() {
-		close();
+		database.close();
 	}
 
 	public boolean addGroup(String name) {

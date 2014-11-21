@@ -451,6 +451,7 @@ containing a value of this type.
         public static final int holo_light=0x7f070006;
         public static final int hybrid=0x7f070004;
         public static final int icon=0x7f07002a;
+        public static final int item_add_group=0x7f070035;
         public static final int left_drawer=0x7f070020;
         public static final int llSearchBar=0x7f070014;
         public static final int lvContacts=0x7f070017;
@@ -505,6 +506,7 @@ containing a value of this type.
         public static final int main=0x7f0b0000;
         public static final int menu_contacts=0x7f0b0001;
         public static final int menu_exit=0x7f0b0002;
+        public static final int menu_groups=0x7f0b0003;
     }
     public static final class string {
         public static final int accept=0x7f050002;

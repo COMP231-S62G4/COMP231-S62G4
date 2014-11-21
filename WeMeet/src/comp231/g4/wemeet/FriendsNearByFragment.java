@@ -110,7 +110,7 @@ public class FriendsNearByFragment extends Fragment implements
 									@Override
 									public void run() {
 										googleMap.addMarker(marker);
-										Log.e("Marker adder", marker.getTitle());
+										//Log.e("Marker adder", marker.getTitle());
 									}
 								});
 

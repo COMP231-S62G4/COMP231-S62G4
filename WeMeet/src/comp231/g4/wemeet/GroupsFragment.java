@@ -5,12 +5,16 @@ import java.util.List;
 import comp231.g4.wemeet.helpers.GroupsDataSource;
 import comp231.g4.wemeet.model.Group;
 
+import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -57,6 +61,25 @@ public class GroupsFragment extends Fragment implements OnClickListener {
 		// set list adapter
 		GroupsAdapter adapter = new GroupsAdapter(getActivity(), 0, 0, groups);
 		lvGroups.setAdapter(adapter);
+		
+		setHasOptionsMenu(true);
+	}
+	
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		inflater.inflate(R.menu.menu_groups, menu);
+		super.onCreateOptionsMenu(menu, inflater); 
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.item_add_group:
+			addGroupDialog.show();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
 	private void initializeAddGroupDialog() {
@@ -109,6 +132,10 @@ public class GroupsFragment extends Fragment implements OnClickListener {
 			addGroupDialog.dismiss();
 			break;
 		case R.id.btnAdd:
+			if(etGroupName.getText().toString().trim().length()==0){
+				etGroupName.setError("Empty group name!");
+				return;
+			}
 			GroupsDataSource dsGroups = new GroupsDataSource(getActivity());
 			try{
 				dsGroups.open();

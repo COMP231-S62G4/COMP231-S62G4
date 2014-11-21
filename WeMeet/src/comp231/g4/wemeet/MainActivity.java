@@ -98,6 +98,8 @@ public class MainActivity extends Activity {
 											@Override
 											public void onClick(View v) {
 												try {
+													btnRegister.setEnabled(false);
+													
 													String countryCode = spCountry
 															.getSelectedItem()
 															.toString();
