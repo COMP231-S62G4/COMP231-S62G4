@@ -11,11 +11,13 @@ import android.app.Dialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -30,7 +32,10 @@ public class GroupsFragment extends Fragment implements OnClickListener {
 	private Dialog addGroupDialog;
 	private AlertDialog dialog;
 	private EditText etGroupName;
-
+	
+	//to keep track of selected group
+	private int selectedGroupPosition = -1;
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -63,6 +68,35 @@ public class GroupsFragment extends Fragment implements OnClickListener {
 		lvGroups.setAdapter(adapter);
 		
 		setHasOptionsMenu(true);
+		
+		//setting item click listener
+		lvGroups.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+			
+			@Override
+			public void onCreateContextMenu(ContextMenu menu, View v,
+					ContextMenuInfo menuInfo) {
+				selectedGroupPosition = lvGroups.getPositionForView(v);
+				
+				MenuInflater inflater =  getActivity().getMenuInflater();
+				inflater.inflate(R.menu.menu_context_groups, menu);
+			}
+		});
+	}
+	
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.menu_item_delete_group:
+			if(selectedGroupPosition != -1){
+				Toast.makeText(getActivity(), lvGroups.getAdapter().getItem(selectedGroupPosition).toString(), Toast.LENGTH_SHORT).show();
+				selectedGroupPosition = -1; //resetting value
+			}
+			break;
+
+		default:
+			break;
+		}
+		return super.onContextItemSelected(item);
 	}
 	
 	@Override

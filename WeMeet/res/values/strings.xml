@@ -24,6 +24,7 @@
     <string name="menu_item_view_contact">View contact</string>
     <string name="menu_item_share_location">Share location</string>
     <string name="menu_item_invite">Send invitation</string>
+    <string name="menu_item_delete_group">Delete Group</string>
     
     <string name="content_delete_account">
         Deleting account will delete all of your data from WeMeet server and will Unregister your device.

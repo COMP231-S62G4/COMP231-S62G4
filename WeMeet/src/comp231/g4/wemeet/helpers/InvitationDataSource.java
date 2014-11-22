@@ -30,7 +30,7 @@ public class InvitationDataSource {
 	}
 
 	public void close() {
-		close();
+		database.close();
 	}
 
 	public boolean addContact(String name, String phoneNumber) {

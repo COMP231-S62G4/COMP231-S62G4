@@ -35,7 +35,7 @@ public class RegisteredContactsDataSource {
 	}
 
 	public void close() {
-		close();
+		database.close();
 	}
 
 	public boolean addContact(Contact contact) {
