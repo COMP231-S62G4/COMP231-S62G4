@@ -5,7 +5,6 @@ import java.util.List;
 import comp231.g4.wemeet.helpers.GroupsDataSource;
 import comp231.g4.wemeet.model.Group;
 
-import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Fragment;
@@ -27,16 +26,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
-public class GroupsFragment extends Fragment implements OnClickListener, android.content.DialogInterface.OnClickListener {
+public class GroupsFragment extends Fragment implements OnClickListener,
+		android.content.DialogInterface.OnClickListener {
 	private ListView lvGroups;
 	private List<Group> groups;
 	private Dialog addGroupDialog;
 	private AlertDialog dialog, deleteGroupDialog;
 	private EditText etGroupName;
-	
-	//to keep track of selected group
+
+	// to keep track of selected group
 	private int selectedGroupPosition = -1;
-	
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -56,11 +56,15 @@ public class GroupsFragment extends Fragment implements OnClickListener, android
 		dialog = new AlertDialog.Builder(getActivity())
 				.setIcon(android.R.drawable.ic_dialog_info)
 				.setCancelable(false).create();
-		
+		dialog.setMessage("You do not have any group.");
+		dialog.setIcon(android.R.drawable.ic_dialog_alert);
+
+		dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Ok",this);
+
 		deleteGroupDialog = new AlertDialog.Builder(getActivity())
-		.setIcon(android.R.drawable.ic_dialog_alert)
-		.setCancelable(true).create();
-		
+				.setIcon(android.R.drawable.ic_dialog_alert)
+				.setCancelable(true).create();
+
 		deleteGroupDialog.setTitle("Are you sure?");
 		deleteGroupDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "No", this);
 		deleteGroupDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes", this);
@@ -75,28 +79,28 @@ public class GroupsFragment extends Fragment implements OnClickListener, android
 		// set list adapter
 		GroupsAdapter adapter = new GroupsAdapter(getActivity(), 0, 0, groups);
 		lvGroups.setAdapter(adapter);
-		
+
 		setHasOptionsMenu(true);
-		
-		//setting item click listener
+
+		// setting item click listener
 		lvGroups.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
-			
+
 			@Override
 			public void onCreateContextMenu(ContextMenu menu, View v,
 					ContextMenuInfo menuInfo) {
 				selectedGroupPosition = ((AdapterContextMenuInfo) menuInfo).position;
-				
-				MenuInflater inflater =  getActivity().getMenuInflater();
+
+				MenuInflater inflater = getActivity().getMenuInflater();
 				inflater.inflate(R.menu.menu_context_groups, menu);
 			}
 		});
 	}
-	
+
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.menu_item_delete_group:
-			if(selectedGroupPosition != -1){
+			if (selectedGroupPosition != -1) {
 				deleteGroupDialog.show();
 			}
 			break;
@@ -106,13 +110,13 @@ public class GroupsFragment extends Fragment implements OnClickListener, android
 		}
 		return super.onContextItemSelected(item);
 	}
-	
+
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		inflater.inflate(R.menu.menu_groups, menu);
-		super.onCreateOptionsMenu(menu, inflater); 
+		super.onCreateOptionsMenu(menu, inflater);
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -151,18 +155,6 @@ public class GroupsFragment extends Fragment implements OnClickListener, android
 		dsGroups.close();
 
 		if (groups.size() == 0) {
-			dialog.setMessage("You have not created any groups yet.");
-			dialog.setIcon(android.R.drawable.ic_dialog_alert);
-
-			dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Ok",
-					new DialogInterface.OnClickListener() {
-
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							dialog.dismiss();
-						}
-					});
-
 			dialog.show();
 		}
 	}
@@ -174,64 +166,83 @@ public class GroupsFragment extends Fragment implements OnClickListener, android
 			addGroupDialog.dismiss();
 			break;
 		case R.id.btnAdd:
-			if(etGroupName.getText().toString().trim().length()==0){
+			if (etGroupName.getText().toString().trim().length() == 0) {
 				etGroupName.setError("Empty group name!");
 				return;
 			}
 			GroupsDataSource dsGroups = new GroupsDataSource(getActivity());
-			try{
+			try {
 				dsGroups.open();
-				
-				//if group already exists
-				if(dsGroups.exists(etGroupName.getText().toString())){
+
+				// if group already exists
+				if (dsGroups.exists(etGroupName.getText().toString())) {
 					etGroupName.setError("Group already exists");
-				}else{
-					if(dsGroups.addGroup(etGroupName.getText().toString())){
-						//if everything is successful
-						addGroupDialog.dismiss();	
-						
-						//updating groups list
+				} else {
+					if (dsGroups.addGroup(etGroupName.getText().toString())) {
+						// if everything is successful
+						addGroupDialog.dismiss();
+
+						// updating groups list
 						groups = dsGroups.getAllGroups();
+
+						lvGroups.setAdapter(new GroupsAdapter(getActivity(), 0,
+								0, groups));
+
+						Toast.makeText(getActivity(), "Group created.",
+								Toast.LENGTH_SHORT).show();
 						
-						lvGroups.setAdapter(new GroupsAdapter(getActivity(), 0, 0, groups));
-						
-						Toast.makeText(getActivity(), "Group created.", Toast.LENGTH_SHORT).show();
+						etGroupName.setText("");
 					}
 				}
-			}catch (Exception e) {
+			} catch (Exception e) {
 				e.printStackTrace();
-			}finally{
+			} finally {
 				dsGroups.close();
 			}
 
 		default:
 			break;
 		}
-		
+
 	}
 
 	@Override
 	public void onClick(DialogInterface dialog, int which) {
-		if(dialog == deleteGroupDialog){
+		if (dialog == deleteGroupDialog) {
 			switch (which) {
 			case AlertDialog.BUTTON_NEGATIVE:
-				deleteGroupDialog.dismiss();	
+				deleteGroupDialog.dismiss();
 				break;
 			case AlertDialog.BUTTON_POSITIVE:
-				Group currentGroup = (Group)lvGroups.getAdapter().getItem(selectedGroupPosition);
-				if(currentGroup!=null){
-					GroupsDataSource dsGroups = new GroupsDataSource(getActivity());
-					dsGroups.open(); //opening db
-					
-					dsGroups.deleteGroup(currentGroup.name);
-					
-					dsGroups.close();//closing db
+				Group currentGroup = (Group) lvGroups.getAdapter().getItem(
+						selectedGroupPosition);
+				if (currentGroup != null) {
+					GroupsDataSource dsGroups = new GroupsDataSource(
+							getActivity());
+					dsGroups.open(); // opening db
+
+					if (dsGroups.deleteGroup(currentGroup.name)) {
+
+						groups = dsGroups.getAllGroups();// updating group list
+
+						Toast.makeText(getActivity(), "Group deleted.",
+								Toast.LENGTH_SHORT).show();
+						
+						lvGroups.setAdapter(new GroupsAdapter(getActivity(), 0, 0, groups));
+						
+						if (groups.size() == 0) {
+							this.dialog.show();
+						}
+					}
+					dsGroups.close();// closing db
 				}
-				
-				selectedGroupPosition = -1; //resetting value
+
+				selectedGroupPosition = -1; // resetting value
 				break;
 			}
+		}else{
+			dialog.dismiss();
 		}
-		
+
 	}
 }
