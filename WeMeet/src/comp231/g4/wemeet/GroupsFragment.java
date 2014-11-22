@@ -25,12 +25,13 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 
-public class GroupsFragment extends Fragment implements OnClickListener {
+public class GroupsFragment extends Fragment implements OnClickListener, android.content.DialogInterface.OnClickListener {
 	private ListView lvGroups;
 	private List<Group> groups;
 	private Dialog addGroupDialog;
-	private AlertDialog dialog;
+	private AlertDialog dialog, deleteGroupDialog;
 	private EditText etGroupName;
 	
 	//to keep track of selected group
@@ -55,6 +56,14 @@ public class GroupsFragment extends Fragment implements OnClickListener {
 		dialog = new AlertDialog.Builder(getActivity())
 				.setIcon(android.R.drawable.ic_dialog_info)
 				.setCancelable(false).create();
+		
+		deleteGroupDialog = new AlertDialog.Builder(getActivity())
+		.setIcon(android.R.drawable.ic_dialog_alert)
+		.setCancelable(true).create();
+		
+		deleteGroupDialog.setTitle("Are you sure?");
+		deleteGroupDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "No", this);
+		deleteGroupDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes", this);
 
 		initializeAddGroupDialog();
 
@@ -75,7 +84,7 @@ public class GroupsFragment extends Fragment implements OnClickListener {
 			@Override
 			public void onCreateContextMenu(ContextMenu menu, View v,
 					ContextMenuInfo menuInfo) {
-				selectedGroupPosition = lvGroups.getPositionForView(v);
+				selectedGroupPosition = ((AdapterContextMenuInfo) menuInfo).position;
 				
 				MenuInflater inflater =  getActivity().getMenuInflater();
 				inflater.inflate(R.menu.menu_context_groups, menu);
@@ -88,8 +97,7 @@ public class GroupsFragment extends Fragment implements OnClickListener {
 		switch (item.getItemId()) {
 		case R.id.menu_item_delete_group:
 			if(selectedGroupPosition != -1){
-				Toast.makeText(getActivity(), lvGroups.getAdapter().getItem(selectedGroupPosition).toString(), Toast.LENGTH_SHORT).show();
-				selectedGroupPosition = -1; //resetting value
+				deleteGroupDialog.show();
 			}
 			break;
 
@@ -198,6 +206,31 @@ public class GroupsFragment extends Fragment implements OnClickListener {
 
 		default:
 			break;
+		}
+		
+	}
+
+	@Override
+	public void onClick(DialogInterface dialog, int which) {
+		if(dialog == deleteGroupDialog){
+			switch (which) {
+			case AlertDialog.BUTTON_NEGATIVE:
+				deleteGroupDialog.dismiss();	
+				break;
+			case AlertDialog.BUTTON_POSITIVE:
+				Group currentGroup = (Group)lvGroups.getAdapter().getItem(selectedGroupPosition);
+				if(currentGroup!=null){
+					GroupsDataSource dsGroups = new GroupsDataSource(getActivity());
+					dsGroups.open(); //opening db
+					
+					dsGroups.deleteGroup(currentGroup.name);
+					
+					dsGroups.close();//closing db
+				}
+				
+				selectedGroupPosition = -1; //resetting value
+				break;
+			}
 		}
 		
 	}
