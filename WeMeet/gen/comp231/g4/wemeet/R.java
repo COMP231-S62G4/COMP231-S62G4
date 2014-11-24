@@ -428,10 +428,10 @@ containing a value of this type.
         public static final int powered_by_google_light=0x7f02002b;
     }
     public static final class id {
-        public static final int action_exit=0x7f070032;
-        public static final int action_send_location_sharing_request=0x7f070031;
+        public static final int action_exit=0x7f070033;
+        public static final int action_send_location_sharing_request=0x7f070032;
         public static final int book_now=0x7f070010;
-        public static final int btnAccept=0x7f070030;
+        public static final int btnAccept=0x7f070031;
         public static final int btnAdd=0x7f07002a;
         public static final int btnCancel=0x7f07001a;
         public static final int btnDelete=0x7f07001b;
@@ -440,6 +440,7 @@ containing a value of this type.
         public static final int buyButton=0x7f07000a;
         public static final int buy_now=0x7f07000f;
         public static final int buy_with_google=0x7f07000e;
+        public static final int cbSelected=0x7f07002d;
         public static final int classic=0x7f070011;
         public static final int content_frame=0x7f070020;
         public static final int drawer_layout=0x7f07001f;
@@ -451,7 +452,7 @@ containing a value of this type.
         public static final int holo_light=0x7f070006;
         public static final int hybrid=0x7f070004;
         public static final int icon=0x7f07002b;
-        public static final int item_add_group=0x7f070037;
+        public static final int item_add_group=0x7f070038;
         public static final int left_drawer=0x7f070021;
         public static final int llSearchBar=0x7f070014;
         public static final int lvContacts=0x7f070017;
@@ -460,10 +461,10 @@ containing a value of this type.
         public static final int lvPhoneNumbers=0x7f070026;
         public static final int map=0x7f07001c;
         public static final int match_parent=0x7f07000c;
-        public static final int menu_item_delete_group=0x7f070036;
-        public static final int menu_item_invite=0x7f070035;
-        public static final int menu_item_share_location=0x7f070034;
-        public static final int menu_item_view_contact=0x7f070033;
+        public static final int menu_item_delete_group=0x7f070037;
+        public static final int menu_item_invite=0x7f070036;
+        public static final int menu_item_share_location=0x7f070035;
+        public static final int menu_item_view_contact=0x7f070034;
         public static final int monochrome=0x7f070013;
         public static final int none=0x7f070000;
         public static final int normal=0x7f070001;
@@ -478,10 +479,10 @@ containing a value of this type.
         public static final int title=0x7f07002c;
         public static final int tvContactName=0x7f070025;
         public static final int tvDetails=0x7f070019;
-        public static final int tvGroupName=0x7f07002f;
+        public static final int tvGroupName=0x7f070030;
         public static final int tvMessage=0x7f070028;
-        public static final int tvName=0x7f07002d;
-        public static final int tvPhone=0x7f07002e;
+        public static final int tvName=0x7f07002e;
+        public static final int tvPhone=0x7f07002f;
         public static final int tvTitle=0x7f070018;
         public static final int wrap_content=0x7f07000d;
     }

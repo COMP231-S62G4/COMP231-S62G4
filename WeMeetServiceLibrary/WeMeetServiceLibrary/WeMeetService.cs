@@ -56,7 +56,7 @@ namespace WeMeetServiceLibrary
             return result > 0;
         }
 
-         public bool UnRegisterPhoneNumber(string phoneNumber)
+        public bool UnRegisterPhoneNumber(string phoneNumber)
         {
             connectionManager = new ConnectionManager(ConfigurationManager.ConnectionStrings["WeMeetDb"].ConnectionString);
             connectionManager.Open();
@@ -132,7 +132,58 @@ namespace WeMeetServiceLibrary
             };
         }
 
-       public bool SendLocationSharingRequest(string fromPhoneNumber, string toPhoneNumber)
+        public bool IsRequestSentTo(string fromPhoneNumber, string toPhoneNumber)
+        {
+            connectionManager = new ConnectionManager(ConfigurationManager.ConnectionStrings["WeMeetDb"].ConnectionString);
+            connectionManager.Open();
+
+            SqlCommand cmd = new SqlCommand("spIsRequestSentTo", connectionManager.con);
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+            cmd.Parameters.Add(new SqlParameter("@FromPhoneNumber", fromPhoneNumber));
+            cmd.Parameters.Add(new SqlParameter("@ToPhoneNumber", toPhoneNumber));
+
+            SqlParameter retval = cmd.Parameters.Add("@ret_val", System.Data.SqlDbType.Int);
+            retval.Direction = ParameterDirection.ReturnValue;
+
+            cmd.ExecuteNonQuery();
+
+            int result = (int)cmd.Parameters["@ret_val"].Value;
+
+            connectionManager.Close();
+
+            return result > 0;
+        }
+
+        public List<string> GetLocationRequests(string phoneNumber)
+        {
+            connectionManager = new ConnectionManager(ConfigurationManager.ConnectionStrings["WeMeetDb"].ConnectionString);
+            connectionManager.Open();
+
+            SqlCommand cmd = new SqlCommand("spGetLocationRequests", connectionManager.con);
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+            cmd.Parameters.Add(new SqlParameter("@PhoneNumber", phoneNumber));
+
+            SqlDataReader sdr = cmd.ExecuteReader();
+
+            List<string> result = new List<string>();
+
+            if (sdr.HasRows)
+            {
+                while (sdr.Read())
+                {
+                    result.Add(sdr[0].ToString());
+                }
+            }
+
+            sdr.Close();
+            connectionManager.Close();
+
+            return result;
+        }
+
+        public bool SendLocationSharingRequest(string fromPhoneNumber, string toPhoneNumber)
         {
             connectionManager = new ConnectionManager(ConfigurationManager.ConnectionStrings["WeMeetDb"].ConnectionString);
             connectionManager.Open();
@@ -261,6 +312,9 @@ namespace WeMeetServiceLibrary
 
             //get location of the requestore
             Location rLocation = GetLocation(phoneNumber, phoneNumber);
+            if (string.IsNullOrEmpty(rLocation.Latitude) || string.IsNullOrEmpty(rLocation.Latitude))
+                return friendsNearBy;
+
             DistanceCalculator dCalculator = new DistanceCalculator();
 
             //calulating distance for each contact in shared list
@@ -269,12 +323,15 @@ namespace WeMeetServiceLibrary
                 //getting location of contact
                 Location location = GetLocation(phoneNumber, sharedLocationList[i]);
 
+                if (string.IsNullOrEmpty(location.Latitude) || string.IsNullOrEmpty(location.Latitude))
+                    continue;
+
                 //calculating distance between requester and contact
                 double lat1 = Convert.ToDouble(rLocation.Latitude);
                 double long1 = Convert.ToDouble(rLocation.Longitude);
                 double lat2 = Convert.ToDouble(location.Latitude);
                 double long2 = Convert.ToDouble(location.Longitude);
-                double distance = dCalculator.distance(lat1,long1,lat2,long2, 'K');
+                double distance = dCalculator.distance(lat1, long1, lat2, long2, 'K');
 
                 //adding to near by list if distance is less than or equal to 5 KM
                 if (distance <= 5)
@@ -290,7 +347,26 @@ namespace WeMeetServiceLibrary
 
             return friendsNearBy;
         }
-#endregion
+
+        public string GetSharedLocationList(string phoneNumber)
+        {
+            connectionManager = new ConnectionManager(ConfigurationManager.ConnectionStrings["WeMeetDb"].ConnectionString);
+            connectionManager.Open();
+
+            SqlCommand cmd = new SqlCommand("spGetSharedLocationList", connectionManager.con);
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+            cmd.Parameters.Add(new SqlParameter("@PhoneNumber", phoneNumber));
+
+            //fetching shared location list
+            string result = cmd.ExecuteScalar().ToString();
+
+            //closing connection
+            connectionManager.Close();
+
+            return result;
+        }
+        #endregion
 
         #region R2
 

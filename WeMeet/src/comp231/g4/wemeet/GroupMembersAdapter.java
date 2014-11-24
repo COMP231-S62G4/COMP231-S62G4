@@ -2,7 +2,6 @@ package comp231.g4.wemeet;
 
 import java.util.List;
 
-import comp231.g4.wemeet.model.Group;
 import comp231.g4.wemeet.model.GroupMemeber;
 
 import android.content.Context;

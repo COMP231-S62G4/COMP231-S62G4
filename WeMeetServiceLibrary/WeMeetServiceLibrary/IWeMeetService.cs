@@ -31,33 +31,10 @@ namespace WeMeetServiceLibrary
         [WebInvoke(UriTemplate = "GetLocation/{requesterPhoneNumber}/{phoneNumber}", Method = "GET")]
         Location GetLocation(string requesterPhoneNumber, string phoneNumber);
 
-        [OperationContract]
-        [WebInvoke(UriTemplate = "CreateGroup/{phoneNumber}/{groupName}", Method = "GET")]
-        void CreateGroup(string phoneNumber, String groupName);
 
         [OperationContract]
-        [WebInvoke(UriTemplate = "RenameGroup/{phoneNumber}/{groupName}", Method = "GET")]
-        void RenameGroup(string phoneNumber, String groupName);
-
-        [OperationContract]
-        [WebInvoke(UriTemplate = "AddGroupMember/{requesterPhoneNumber}/{groupName}/{phoneNumber}", Method = "GET")]
-        void AddGroupMember(string requesterPhoneNumber, String groupName, string phoneNumber);
-
-        [OperationContract]
-        [WebInvoke(UriTemplate = "DeleteGroupMember/{requesterPhoneNumber}/{groupName}/{phoneNumber}", Method = "GET")]
-        void DeleteGroupMember(string requesterPhoneNumber, String groupName, string phoneNumber);
-
-        [OperationContract]
-        [WebInvoke(UriTemplate = "DeleteGroup/{phoneNumber}/{groupName}", Method = "GET")]
-        void DeleteGroup(string phoneNumber, String groupName);
-
-        [OperationContract]
-        [WebInvoke(UriTemplate = "GetGroups/{phoneNumber}", Method = "GET")]
-        List<string> GetGroups(string phoneNumber);
-
-        [OperationContract]
-        [WebInvoke(UriTemplate = "GetGroupMembers/{phoneNumber}/{groupName}", Method = "GET")]
-        List<string> GetGroupMembers(string phoneNumber, string groupName);
+        [WebInvoke(UriTemplate = "GetSharedLocationList/{phoneNumber}", Method = "GET")]
+        string GetSharedLocationList(string phoneNumber);
 
         [OperationContract]
         [WebInvoke(UriTemplate = "IsRequestSentTo/{fromPhoneNumber}/{toPhoneNumber}", Method = "GET")]

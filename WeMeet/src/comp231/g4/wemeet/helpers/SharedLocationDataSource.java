@@ -72,7 +72,7 @@ public class SharedLocationDataSource {
 		return ret_val;
 	}
 
-	public List<Contact> getAllContacts(Contact contact) {
+	public List<Contact> getAllContacts() {
 		List<Contact> contacts = new ArrayList<Contact>();
 
 		Cursor cursor = database.query(TABLE_SHARED_LOCATION, allColumns,
