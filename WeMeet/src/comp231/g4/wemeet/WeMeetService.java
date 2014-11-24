@@ -23,7 +23,6 @@ import android.content.SharedPreferences.Editor;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.MailTo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
@@ -57,10 +56,16 @@ public class WeMeetService extends Service implements LocationListener {
 		// hide the notification after its selected
 		notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
-		// notificationManager.notify(NOTIFICATION_ID, notification);
+		notificationManager.notify(NOTIFICATION_ID, notification);
 
 		if (!syncedToday()) {
-			syncContacts(); // syncing contacts
+			// creating instance of client
+			AndroidClient client = new AndroidClient();
+
+			syncContacts(client); // syncing contacts
+
+			// sync shared location list
+			SyncSharedLocationList(client);
 		}
 
 		setLocationListener(); // updating location on server
@@ -91,7 +96,7 @@ public class WeMeetService extends Service implements LocationListener {
 
 	}
 
-	private void syncContacts() {
+	private void syncContacts(final AndroidClient client) {
 		Thread thread = new Thread(new Runnable() {
 
 			@Override
@@ -114,68 +119,11 @@ public class WeMeetService extends Service implements LocationListener {
 				RegisteredContactsDataSource dsRegisteredContacts = new RegisteredContactsDataSource(
 						WeMeetService.this);
 
-				// creating instance of client
-				AndroidClient client = new AndroidClient();
-
-				// sync contacts
-				SyncContacts(contacts, dsRegisteredContacts, client);
-
-				// sync shared location list
-				SyncSharedLocationList(client);
-
-				editor.putString(KEY_LAST_SYNC, new Date().toString());
-				editor.commit();
-
-				notification = new Notification.Builder(WeMeetService.this)
-						.setContentTitle("WeMeet Service")
-						.setContentText("Contacts synced.")
-						.setSmallIcon(R.drawable.ic_launcher).build();
-
-				NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-				// hide the notification after its selected
-				notification.flags |= Notification.FLAG_AUTO_CANCEL;
-
-				// notificationManager.notify(NOTIFICATION_ID, notification);
-			}
-
-			private void SyncSharedLocationList(AndroidClient client) {
-
-				String phoneNumber = PreferenceManager
-						.getDefaultSharedPreferences(
-								WeMeetService.this.getApplicationContext())
-						.getString(MainActivity.KEY_PHONE_NUMBER, "16472787694");
-				phoneNumber = ValidationHelper.SanitizePhoneNumber(phoneNumber);
-
-				try {
-					String sharedLocationList = client
-							.getSharedLocationList(phoneNumber);
-
-					SharedLocationDataSource dsSharedLocation = new SharedLocationDataSource(
-							WeMeetService.this);
-					dsSharedLocation.open();
-
-					ContactFetcher fetcher = new ContactFetcher(
-							WeMeetService.this);
-
-					String[] sharedLocationListItem = sharedLocationList
-							.split(",");
-					for (int i = 0; i < sharedLocationListItem.length; i++) {
-						if (sharedLocationListItem[i].length() > 2) {
-							Contact contact = fetcher
-									.GetContactDetails(sharedLocationListItem[i]);
-							dsSharedLocation.addContact(contact);
-						}
-					}
-
-					dsSharedLocation.close();
-				} catch (Exception e) {
-					Log.e("WeMeet_Exception", e.getMessage());
-				}
-			}
-
-			private void SyncContacts(ArrayList<Contact> contacts,
-					RegisteredContactsDataSource dsRegisteredContacts,
-					AndroidClient client) {
+				 //removing all old contacts
+				dsRegisteredContacts.open();
+				dsRegisteredContacts.deleteAll();
+				dsRegisteredContacts.close();
+				
 				// iterating through all contacts
 				for (int index = 0; index < contacts.size(); index++) {
 					try {
@@ -211,11 +159,73 @@ public class WeMeetService extends Service implements LocationListener {
 						Log.e("WeMeet_Exception", e.getMessage());
 					}
 				}
+
+				editor.putString(KEY_LAST_SYNC, new Date().toString());
+				editor.commit();
+
+				notification = new Notification.Builder(WeMeetService.this)
+						.setContentTitle("WeMeet Service")
+						.setContentText("Contacts synced.")
+						.setSmallIcon(R.drawable.ic_launcher).build();
+
+				NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+				// hide the notification after its selected
+				notification.flags |= Notification.FLAG_AUTO_CANCEL;
+
+				notificationManager.notify(NOTIFICATION_ID, notification);
 			}
 		});
 
 		thread.start();
 
+	}
+
+	private void SyncSharedLocationList(final AndroidClient client) {
+
+		Thread t = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				String phoneNumber = PreferenceManager
+						.getDefaultSharedPreferences(
+								WeMeetService.this.getApplicationContext())
+						.getString(MainActivity.KEY_PHONE_NUMBER, "16472787694");
+				phoneNumber = ValidationHelper.SanitizePhoneNumber(phoneNumber);
+
+				try {
+					String sharedLocationList = client
+							.getSharedLocationList(phoneNumber);
+
+					SharedLocationDataSource dsSharedLocation = new SharedLocationDataSource(
+							WeMeetService.this);
+					dsSharedLocation.open();
+
+					//removing all old contacts
+					dsSharedLocation.deleteAll();
+					
+					ContactFetcher fetcher = new ContactFetcher(
+							WeMeetService.this);
+
+					String[] sharedLocationListItem = sharedLocationList
+							.split(",");
+					for (int i = 0; i < sharedLocationListItem.length; i++) {
+						if (sharedLocationListItem[i].length() > 2) {
+							Contact contact = fetcher
+									.GetContactDetails(sharedLocationListItem[i]);
+							dsSharedLocation.addContact(contact);
+						}
+					}
+
+					dsSharedLocation.close();
+				} catch (Exception e) {
+					Log.e("WeMeet_Exception", e.getMessage());
+				}
+
+			}
+		});
+		
+		t.start();//starting thread
 	}
 
 	@SuppressWarnings("deprecation")

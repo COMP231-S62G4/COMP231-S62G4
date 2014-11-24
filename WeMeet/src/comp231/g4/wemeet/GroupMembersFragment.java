@@ -20,7 +20,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.LinearLayout;
@@ -28,7 +27,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 public class GroupMembersFragment extends Fragment implements
-		android.content.DialogInterface.OnClickListener, OnClickListener {
+		android.content.DialogInterface.OnClickListener {
 	private ListView lvGroupMembers, lvSharedLocationContacts;
 	private List<GroupMember> groupMembers;
 	private AlertDialog dialog;
@@ -81,11 +80,6 @@ public class GroupMembersFragment extends Fragment implements
 		// loading groups
 		loadGroupMembers();
 
-		// set list adapter
-		GroupMembersAdapter adapter = new GroupMembersAdapter(getActivity(), 0,
-				0, groupMembers);
-		lvGroupMembers.setAdapter(adapter);
-
 		// setting context menu for list view
 		lvGroupMembers.setOnCreateContextMenuListener(this);
 
@@ -120,8 +114,14 @@ public class GroupMembersFragment extends Fragment implements
 					dsGroups.open();// opening db
 
 					dsGroups.removeGroupMemeber(groupId, member);
-					
+
 					dsGroups.close();// closing db
+
+					Toast.makeText(getActivity(), "Member deleted.",
+							Toast.LENGTH_SHORT).show();
+
+					// reloading list
+					loadGroupMembers();
 				}
 				// resetting position
 				selectedGroupMemberPos = -1;
@@ -156,13 +156,6 @@ public class GroupMembersFragment extends Fragment implements
 				Toast.makeText(getActivity(),
 						"Your location sharing list is empty.",
 						Toast.LENGTH_SHORT).show();
-			}
-
-			// dummy data
-			for (int i = 0; i < 3; i++) {
-				Contact contact = new Contact(String.valueOf(i), "Vipul Save");
-				contact.addNumber("1111111111", "");
-				sharedLocationContacts.add(contact);
 			}
 
 			dsSharedLocation.close(); // closing db
@@ -219,6 +212,11 @@ public class GroupMembersFragment extends Fragment implements
 		if (groupMembers.size() == 0) {
 			dialog.show();
 		}
+
+		// set list adapter
+		GroupMembersAdapter adapter = new GroupMembersAdapter(getActivity(), 0,
+				0, groupMembers);
+		lvGroupMembers.setAdapter(adapter);
 	}
 
 	@Override
@@ -234,30 +232,31 @@ public class GroupMembersFragment extends Fragment implements
 
 				List<Contact> selectedContacts = ((AddGroupMemeberAdapter) lvSharedLocationContacts
 						.getAdapter()).selectedContacts;
-				
+
 				GroupsDataSource dsGroups = new GroupsDataSource(getActivity());
 				dsGroups.open();
-				
+
 				for (int i = 0; i < selectedContacts.size(); i++) {
 					// adding contacts as a group member
-					dsGroups.addGroupMember(groupId, selectedContacts.get(i).name, selectedContacts.get(i).numbers.get(0).number);
-					// incrementing counter
-					addedContacts++;
+					if (dsGroups.addGroupMember(groupId,
+							selectedContacts.get(i).name,
+							selectedContacts.get(i).numbers.get(0).number)) {
+						// incrementing counter
+						addedContacts++;
+					}
 				}
-				
+
 				dsGroups.close();
 				Toast.makeText(getActivity(),
 						addedContacts + " members added.", Toast.LENGTH_SHORT)
 						.show();
+
+				// reloading list
+				loadGroupMembers();
 				break;
 			default:
 				break;
 			}
 		}
-	}
-
-	@Override
-	public void onClick(View v) {
-
 	}
 }

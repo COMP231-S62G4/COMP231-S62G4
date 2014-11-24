@@ -41,7 +41,7 @@ public class SharedLocationDataSource {
 	public boolean addContact(Contact contact) {
 		ContentValues values = new ContentValues();
 		values.put(COL_NAME, contact.name);
-		values.put(COL_PHONENUMBER, contact.numbers.get(0).number);
+		values.put(COL_PHONENUMBER, contact.numbers.get(0).number.replace("\"", ""));
 
 		long id = database.insert(TABLE_SHARED_LOCATION, null, values);
 		return id > 0;
