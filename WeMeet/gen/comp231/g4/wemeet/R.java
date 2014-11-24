@@ -452,7 +452,7 @@ containing a value of this type.
         public static final int holo_light=0x7f070006;
         public static final int hybrid=0x7f070004;
         public static final int icon=0x7f07002b;
-        public static final int item_add_group=0x7f070038;
+        public static final int item_add_group=0x7f070039;
         public static final int left_drawer=0x7f070021;
         public static final int llSearchBar=0x7f070014;
         public static final int lvContacts=0x7f070017;
@@ -461,7 +461,8 @@ containing a value of this type.
         public static final int lvPhoneNumbers=0x7f070026;
         public static final int map=0x7f07001c;
         public static final int match_parent=0x7f07000c;
-        public static final int menu_item_delete_group=0x7f070037;
+        public static final int menu_item_delete_group=0x7f070038;
+        public static final int menu_item_delete_group_member=0x7f070037;
         public static final int menu_item_invite=0x7f070036;
         public static final int menu_item_share_location=0x7f070035;
         public static final int menu_item_view_contact=0x7f070034;
@@ -509,9 +510,10 @@ containing a value of this type.
     public static final class menu {
         public static final int main=0x7f0b0000;
         public static final int menu_contacts=0x7f0b0001;
-        public static final int menu_context_groups=0x7f0b0002;
-        public static final int menu_exit=0x7f0b0003;
-        public static final int menu_groups=0x7f0b0004;
+        public static final int menu_context_group_members=0x7f0b0002;
+        public static final int menu_context_groups=0x7f0b0003;
+        public static final int menu_exit=0x7f0b0004;
+        public static final int menu_groups=0x7f0b0005;
     }
     public static final class string {
         public static final int accept=0x7f050002;
@@ -621,12 +623,13 @@ containing a value of this type.
         /**  Long form sign-in button text [CHAR LIMIT=30] 
          */
         public static final int common_signin_button_text_long=0x7f050020;
-        public static final int content_delete_account=0x7f050035;
+        public static final int content_delete_account=0x7f050036;
         public static final int create_calendar_message=0x7f050005;
         public static final int create_calendar_title=0x7f050004;
         public static final int decline=0x7f050003;
         public static final int hint_phone_number=0x7f05002b;
         public static final int menu_item_delete_group=0x7f050034;
+        public static final int menu_item_delete_group_member=0x7f050035;
         public static final int menu_item_invite=0x7f050033;
         public static final int menu_item_share_location=0x7f050032;
         public static final int menu_item_view_contact=0x7f050031;
@@ -634,7 +637,7 @@ containing a value of this type.
         public static final int msg_wait=0x7f050030;
         public static final int store_picture_message=0x7f050001;
         public static final int store_picture_title=0x7f050000;
-        public static final int str_invitation=0x7f050036;
+        public static final int str_invitation=0x7f050037;
         public static final int title_connecting_server=0x7f050026;
         public static final int title_deleting_Account=0x7f050025;
         public static final int title_loading_contacts=0x7f050027;

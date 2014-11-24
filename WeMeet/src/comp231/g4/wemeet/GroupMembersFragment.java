@@ -7,19 +7,22 @@ import comp231.g4.wemeet.helpers.GroupsDataSource;
 import comp231.g4.wemeet.helpers.SharedLocationDataSource;
 import comp231.g4.wemeet.model.Contact;
 import comp231.g4.wemeet.model.Group;
-import comp231.g4.wemeet.model.GroupMemeber;
+import comp231.g4.wemeet.model.GroupMember;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -27,7 +30,7 @@ import android.widget.Toast;
 public class GroupMembersFragment extends Fragment implements
 		android.content.DialogInterface.OnClickListener, OnClickListener {
 	private ListView lvGroupMembers, lvSharedLocationContacts;
-	private List<GroupMemeber> groupMembers;
+	private List<GroupMember> groupMembers;
 	private AlertDialog dialog;
 	private AlertDialog addGroupMemberDialog;
 
@@ -35,6 +38,9 @@ public class GroupMembersFragment extends Fragment implements
 	private int groupId;
 	private String groupName;
 	private List<Contact> sharedLocationContacts;
+
+	// variables to hold current selected group member
+	private int selectedGroupMemberPos = -1;
 
 	public GroupMembersFragment(Group group) {
 		super();
@@ -80,13 +86,51 @@ public class GroupMembersFragment extends Fragment implements
 				0, groupMembers);
 		lvGroupMembers.setAdapter(adapter);
 
+		// setting context menu for list view
+		lvGroupMembers.setOnCreateContextMenuListener(this);
+
 		// initializing add group member dialog
 		initializeAddGroupMemberDialog();
 
 		setHasOptionsMenu(true);
-		
+
 		getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
 		getActivity().getActionBar().setIcon(R.drawable.ic_groups);
+	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		selectedGroupMemberPos = ((AdapterContextMenuInfo) menuInfo).position;
+
+		super.onCreateContextMenu(menu, v, menuInfo);
+		MenuInflater inflater = getActivity().getMenuInflater();
+		inflater.inflate(R.menu.menu_context_group_members, menu);
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.menu_item_delete_group_member:
+			if (selectedGroupMemberPos != -1) {
+				GroupMember member = groupMembers.get(selectedGroupMemberPos);
+				if (member != null) {
+					GroupsDataSource dsGroups = new GroupsDataSource(
+							getActivity());
+					dsGroups.open();// opening db
+
+					dsGroups.removeGroupMemeber(groupId, member);
+					
+					dsGroups.close();// closing db
+				}
+				// resetting position
+				selectedGroupMemberPos = -1;
+			}
+			return true;
+
+		default:
+			return super.onContextItemSelected(item);
+		}
 	}
 
 	@Override
@@ -99,13 +143,38 @@ public class GroupMembersFragment extends Fragment implements
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.item_add_group:
+
+			// instantiating shared contact list
+			SharedLocationDataSource dsSharedLocation = new SharedLocationDataSource(
+					getActivity());
+
+			dsSharedLocation.open(); // opening db
+
+			sharedLocationContacts = dsSharedLocation.getAllContacts();
+
 			if (sharedLocationContacts.size() == 0) {
 				Toast.makeText(getActivity(),
 						"Your location sharing list is empty.",
 						Toast.LENGTH_SHORT).show();
-			} else {
-				addGroupMemberDialog.show();// showing add group members dialog
 			}
+
+			// dummy data
+			for (int i = 0; i < 3; i++) {
+				Contact contact = new Contact(String.valueOf(i), "Vipul Save");
+				contact.addNumber("1111111111", "");
+				sharedLocationContacts.add(contact);
+			}
+
+			dsSharedLocation.close(); // closing db
+
+			// setting adapter
+			AddGroupMemeberAdapter adapter = new AddGroupMemeberAdapter(
+					getActivity(), new ArrayList<Contact>(
+							sharedLocationContacts));
+			lvSharedLocationContacts.setAdapter(adapter);
+
+			addGroupMemberDialog.show();// showing add group members dialog
+
 			return true;
 
 		default:
@@ -114,12 +183,21 @@ public class GroupMembersFragment extends Fragment implements
 	}
 
 	private void initializeAddGroupMemberDialog() {
-		addGroupMemberDialog = new AlertDialog.Builder(getActivity())
-				.setIcon(android.R.drawable.ic_dialog_info)
-				.setCancelable(false).create();
+		View view = getActivity().getLayoutInflater().inflate(
+				R.layout.activity_contacts, null);
+		// hiding search bar
+		LinearLayout llSearchBar = (LinearLayout) view
+				.findViewById(R.id.llSearchBar);
+		llSearchBar.setVisibility(View.GONE);
 
-		// reusing contacts layout instead of creating new one
-		addGroupMemberDialog.setContentView(R.layout.activity_contacts);
+		// setting shared location contacts as list
+		lvSharedLocationContacts = (ListView) view
+				.findViewById(R.id.lvContacts);
+
+		addGroupMemberDialog = new AlertDialog.Builder(getActivity())
+				.setIcon(R.drawable.ic_groups).setCancelable(false)
+				.setView(view).create();
+
 		addGroupMemberDialog.setCancelable(true);
 		// setting title for dialog
 		addGroupMemberDialog.setTitle(groupName);
@@ -128,30 +206,6 @@ public class GroupMembersFragment extends Fragment implements
 				this);
 		addGroupMemberDialog
 				.setButton(AlertDialog.BUTTON_POSITIVE, "Add", this);
-
-		// hiding search bar
-		LinearLayout llSearchBar = (LinearLayout) addGroupMemberDialog
-				.findViewById(R.id.llSearchBar);
-		llSearchBar.setVisibility(View.GONE);
-
-		// setting shared location contacts as list
-		lvSharedLocationContacts = (ListView) addGroupMemberDialog
-				.findViewById(R.id.lvContacts);
-
-		// instantiating shared contact list
-		SharedLocationDataSource dsSharedLocation = new SharedLocationDataSource(
-				getActivity());
-
-		dsSharedLocation.open(); // opening db
-
-		sharedLocationContacts = dsSharedLocation.getAllContacts();
-
-		dsSharedLocation.close(); // closing db
-
-		// setting adapter
-		AddGroupMemeberAdapter adapter = new AddGroupMemeberAdapter(
-				getActivity(), new ArrayList<Contact>(sharedLocationContacts));
-		lvSharedLocationContacts.setAdapter(adapter);
 	}
 
 	private void loadGroupMembers() {
@@ -180,12 +234,18 @@ public class GroupMembersFragment extends Fragment implements
 
 				List<Contact> selectedContacts = ((AddGroupMemeberAdapter) lvSharedLocationContacts
 						.getAdapter()).selectedContacts;
+				
+				GroupsDataSource dsGroups = new GroupsDataSource(getActivity());
+				dsGroups.open();
+				
 				for (int i = 0; i < selectedContacts.size(); i++) {
 					// adding contacts as a group member
-
+					dsGroups.addGroupMember(groupId, selectedContacts.get(i).name, selectedContacts.get(i).numbers.get(0).number);
 					// incrementing counter
 					addedContacts++;
 				}
+				
+				dsGroups.close();
 				Toast.makeText(getActivity(),
 						addedContacts + " members added.", Toast.LENGTH_SHORT)
 						.show();

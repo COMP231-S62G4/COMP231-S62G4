@@ -6,15 +6,15 @@ import java.util.List;
 public class Group {
 	public int id;
 	public String name;
-	public List<GroupMemeber> groupMembers;
+	public List<GroupMember> groupMembers;
 
 	public Group(int id, String name) {
 		this.id = id;
 		this.name = name;
-		groupMembers = new ArrayList<GroupMemeber>();
+		groupMembers = new ArrayList<GroupMember>();
 	}
 
-	public boolean addGroupMemeber(GroupMemeber member) {
+	public boolean addGroupMemeber(GroupMember member) {
 		if (groupMembers.contains(member)) {
 			return false;
 		} else {
@@ -22,7 +22,7 @@ public class Group {
 		}
 	}
 
-	public boolean removeGroupMemeber(GroupMemeber member) {
+	public boolean removeGroupMemeber(GroupMember member) {
 		if (groupMembers.contains(member)) {
 			return false;
 		} else {
@@ -30,7 +30,7 @@ public class Group {
 		}
 	}
 
-	public List<GroupMemeber> getGroupMemebers(Contact contact) {
-		return new ArrayList<GroupMemeber>(groupMembers);
+	public List<GroupMember> getGroupMemebers(Contact contact) {
+		return new ArrayList<GroupMember>(groupMembers);
 	}
 }

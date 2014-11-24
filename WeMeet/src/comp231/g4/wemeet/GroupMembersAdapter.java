@@ -2,7 +2,7 @@ package comp231.g4.wemeet;
 
 import java.util.List;
 
-import comp231.g4.wemeet.model.GroupMemeber;
+import comp231.g4.wemeet.model.GroupMember;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -11,16 +11,16 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-public class GroupMembersAdapter extends ArrayAdapter<GroupMemeber> {
+public class GroupMembersAdapter extends ArrayAdapter<GroupMember> {
 	public GroupMembersAdapter(Context context, int resource,
-			int textViewResourceId, List<GroupMemeber> objects) {
+			int textViewResourceId, List<GroupMember> objects) {
 		super(context, resource, textViewResourceId, objects);
 	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		// Get the data item
-		GroupMemeber groupMember = getItem(position);
+		GroupMember groupMember = getItem(position);
 		// Check if an existing view is being reused, otherwise inflate the view
 		View view = convertView;
 		if (view == null) {

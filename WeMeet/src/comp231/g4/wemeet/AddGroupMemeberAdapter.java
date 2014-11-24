@@ -70,4 +70,8 @@ public class AddGroupMemeberAdapter extends ArrayAdapter<Contact> implements
 			selectedContacts.add(contact);
 		}
 	}
+	
+	public void ClearSelection(){
+		selectedContacts.clear();
+	}
 }
