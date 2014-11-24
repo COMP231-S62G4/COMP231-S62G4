@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -59,7 +60,7 @@ public class GroupsFragment extends Fragment implements OnClickListener,
 		dialog.setMessage("You do not have any group.");
 		dialog.setIcon(android.R.drawable.ic_dialog_alert);
 
-		dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Ok",this);
+		dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Ok", this);
 
 		deleteGroupDialog = new AlertDialog.Builder(getActivity())
 				.setIcon(android.R.drawable.ic_dialog_alert)
@@ -82,7 +83,7 @@ public class GroupsFragment extends Fragment implements OnClickListener,
 
 		setHasOptionsMenu(true);
 
-		// setting item click listener
+		// setting item click listener for context menu
 		lvGroups.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
 
 			@Override
@@ -92,6 +93,21 @@ public class GroupsFragment extends Fragment implements OnClickListener,
 
 				MenuInflater inflater = getActivity().getMenuInflater();
 				inflater.inflate(R.menu.menu_context_groups, menu);
+			}
+		});
+
+		// setting item click listener to open group details
+		lvGroups.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				Group group = (Group) lvGroups.getAdapter().getItem(position);
+
+				Fragment fragment = new GroupMembersFragment(group);
+				android.app.FragmentManager fragmentManager = getFragmentManager();
+				fragmentManager.beginTransaction()
+						.replace(R.id.content_frame, fragment).addToBackStack(null).commit();
 			}
 		});
 	}
@@ -190,7 +206,7 @@ public class GroupsFragment extends Fragment implements OnClickListener,
 
 						Toast.makeText(getActivity(), "Group created.",
 								Toast.LENGTH_SHORT).show();
-						
+
 						etGroupName.setText("");
 					}
 				}
@@ -227,9 +243,10 @@ public class GroupsFragment extends Fragment implements OnClickListener,
 
 						Toast.makeText(getActivity(), "Group deleted.",
 								Toast.LENGTH_SHORT).show();
-						
-						lvGroups.setAdapter(new GroupsAdapter(getActivity(), 0, 0, groups));
-						
+
+						lvGroups.setAdapter(new GroupsAdapter(getActivity(), 0,
+								0, groups));
+
 						if (groups.size() == 0) {
 							this.dialog.show();
 						}
@@ -240,7 +257,7 @@ public class GroupsFragment extends Fragment implements OnClickListener,
 				selectedGroupPosition = -1; // resetting value
 				break;
 			}
-		}else{
+		} else {
 			dialog.dismiss();
 		}
 
