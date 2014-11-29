@@ -13,6 +13,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
+import com.google.android.gms.maps.GoogleMap.OnMyLocationChangeListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -42,17 +43,20 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 public class FriendsNearByFragment extends Fragment implements
-		OnMarkerClickListener, OnInfoWindowClickListener {
+		OnInfoWindowClickListener, OnMyLocationChangeListener {
 	// Google Map
 	private GoogleMap googleMap;
 	private Timer updateTimer;
-	private final static int UPDATE_DELAY = 1000 * 60;// updating at every 3
-														// minutes
-
+	private final static int UPDATE_DELAY = 1000 * 60;// updating at every 3 minutes
+	private View view;
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.activity_friends_nearby, null);
+		if(view == null){
+			view = inflater.inflate(R.layout.activity_friends_nearby, null);
+		}
+		return view;
 	}
 
 	@Override
@@ -110,7 +114,7 @@ public class FriendsNearByFragment extends Fragment implements
 									@Override
 									public void run() {
 										googleMap.addMarker(marker);
-										//Log.e("Marker adder", marker.getTitle());
+										Log.e("Marker adder", marker.getTitle());
 									}
 								});
 
@@ -197,19 +201,13 @@ public class FriendsNearByFragment extends Fragment implements
 			googleMap = ((MapFragment) getFragmentManager().findFragmentById(
 					R.id.map)).getMap();
 
+			googleMap.setOnInfoWindowClickListener(this);
+			
 			googleMap.setMyLocationEnabled(true);
 			googleMap.getUiSettings().setZoomControlsEnabled(true);
 			googleMap.getUiSettings().setZoomGesturesEnabled(true);
 
-			Location location = googleMap.getMyLocation();
-			LatLng coordinate = new LatLng(location.getLatitude(),
-					location.getLongitude());
-			CameraUpdate myLocation = CameraUpdateFactory.newLatLngZoom(
-					coordinate, 5);
-			googleMap.animateCamera(myLocation);
-
-			googleMap.setOnMarkerClickListener(this);
-			googleMap.setOnInfoWindowClickListener(this);
+			googleMap.setOnMyLocationChangeListener(this);
 
 			// check if map is created successfully or not
 			if (googleMap == null) {
@@ -234,15 +232,15 @@ public class FriendsNearByFragment extends Fragment implements
 	}
 
 	@Override
-	public boolean onMarkerClick(Marker arg0) {
-		Toast.makeText(getActivity(), arg0.getTitle(), Toast.LENGTH_SHORT)
-				.show();
-		return true;
-	}
-
-	@Override
 	public void onInfoWindowClick(Marker arg0) {
 		Toast.makeText(getActivity(), arg0.getTitle(), Toast.LENGTH_SHORT)
 				.show();
+	}
+
+	@Override
+	public void onMyLocationChange(Location location) {
+		LatLng coordinate = new LatLng(location.getLatitude(),
+				location.getLongitude());
+		googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinate, 12));
 	}
 }

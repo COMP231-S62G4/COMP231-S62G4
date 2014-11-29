@@ -11,6 +11,7 @@ import comp231.g4.wemeet.model.GroupMember;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -93,6 +94,14 @@ public class GroupMembersFragment extends Fragment implements
 	}
 
 	@Override
+	public void onResume() {
+		super.onResume();
+		
+		// set activity title to group name
+		getActivity().setTitle(groupName);
+	}
+	
+	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
 		selectedGroupMemberPos = ((AdapterContextMenuInfo) menuInfo).position;
@@ -135,14 +144,14 @@ public class GroupMembersFragment extends Fragment implements
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		inflater.inflate(R.menu.menu_groups, menu);
+		inflater.inflate(R.menu.menu_group_members, menu);
 		super.onCreateOptionsMenu(menu, inflater);
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.item_add_group:
+		case R.id.item_add_group_member:
 
 			// instantiating shared contact list
 			SharedLocationDataSource dsSharedLocation = new SharedLocationDataSource(
@@ -156,17 +165,28 @@ public class GroupMembersFragment extends Fragment implements
 				Toast.makeText(getActivity(),
 						"Your location sharing list is empty.",
 						Toast.LENGTH_SHORT).show();
+			}else{
+				// setting adapter
+				AddGroupMemeberAdapter adapter = new AddGroupMemeberAdapter(
+						getActivity(), new ArrayList<Contact>(
+								sharedLocationContacts));
+				lvSharedLocationContacts.setAdapter(adapter);
+
+				addGroupMemberDialog.show();// showing add group members dialog
 			}
 
 			dsSharedLocation.close(); // closing db
 
-			// setting adapter
-			AddGroupMemeberAdapter adapter = new AddGroupMemeberAdapter(
-					getActivity(), new ArrayList<Contact>(
-							sharedLocationContacts));
-			lvSharedLocationContacts.setAdapter(adapter);
+			return true;
+		case R.id.item_locate_members:
 
-			addGroupMemberDialog.show();// showing add group members dialog
+			//opening locate group members fragment
+			Group group = new Group(groupId, groupName);
+			LocateGroupFragment fragment = new LocateGroupFragment(group);
+			
+			FragmentManager manager = getFragmentManager();
+			manager.beginTransaction()
+			.replace(R.id.content_frame, fragment).addToBackStack(null).commit();
 
 			return true;
 

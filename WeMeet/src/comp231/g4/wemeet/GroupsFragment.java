@@ -262,4 +262,13 @@ public class GroupsFragment extends Fragment implements OnClickListener,
 		}
 
 	}
+	
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		
+		// set activity title to group name
+		getActivity().setTitle("Groups");
+	}
 }
