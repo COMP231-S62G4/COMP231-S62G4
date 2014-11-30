@@ -98,7 +98,7 @@ public class MainActivity extends Activity {
 											@Override
 											public void onClick(View v) {
 												try {
-													
+
 													String countryCode = spCountry
 															.getSelectedItem()
 															.toString();
@@ -114,8 +114,9 @@ public class MainActivity extends Activity {
 															.IsValidPhoneNumber(etPhoneNumber
 																	.getText()
 																	.toString())) {
-														btnRegister.setEnabled(false);
-														
+														btnRegister
+																.setEnabled(false);
+
 														Thread thread = new Thread(
 																new Runnable() {
 
@@ -176,11 +177,19 @@ public class MainActivity extends Activity {
 											}
 										});
 							} else {
-								// code to launch FriendsNearBy activity
-								Intent i = new Intent(MainActivity.this,
-										HomeActivity.class);
-								i.putExtra(TAG_FIRST_LAUNCH, true);
-								startActivity(i);
+								// code to check whether password is enable or not
+								if (IsPasswordEnabled()) {
+									// code to launch Authentication activity
+									Intent i = new Intent(MainActivity.this,
+											AuthenticationActivity.class);
+									startActivity(i);
+								} else {
+									// code to launch FriendsNearBy activity
+									Intent i = new Intent(MainActivity.this,
+											HomeActivity.class);
+									i.putExtra(TAG_FIRST_LAUNCH, true);
+									startActivity(i);
+								}
 							}
 
 						}
@@ -214,6 +223,10 @@ public class MainActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 
+	private boolean IsPasswordEnabled() {
+		return true;
+	}
+	
 	private void showErrorDialog() {
 		AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
 				.setIcon(android.R.drawable.ic_dialog_info)
@@ -240,7 +253,7 @@ public class MainActivity extends Activity {
 
 		dialog.show();
 	}
-	
+
 	@Override
 	protected void onRestart() {
 		super.onRestart();
