@@ -21,7 +21,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 public class DeleteAccountFragment extends Fragment implements OnClickListener {
-	private Button btnCancel, btnDelete;
+	private Button btnDelete;
 	private Dialog dialogLoading;
 	private AlertDialog dialog;
 
@@ -30,18 +30,15 @@ public class DeleteAccountFragment extends Fragment implements OnClickListener {
 			Bundle savedInstanceState) {
 		return inflater.inflate(R.layout.activity_delete_account, null);
 	}
-	
+
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		// initializing components
 		InitializeComponents();
 	}
 
 	private void InitializeComponents() {
-		btnDelete = (Button)getActivity().findViewById(R.id.btnDelete);
+		btnDelete = (Button) getActivity().findViewById(R.id.btnDelete);
 		btnDelete.setOnClickListener(this);
-
-		btnCancel = (Button) getActivity().findViewById(R.id.btnCancel);
-		btnCancel.setOnClickListener(this);
 
 		dialogLoading = new Dialog(getActivity());
 		dialogLoading.setTitle(R.string.title_deleting_Account);
@@ -61,10 +58,6 @@ public class DeleteAccountFragment extends Fragment implements OnClickListener {
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
-		case R.id.btnCancel:
-			getActivity().finish();
-			break;
-
 		case R.id.btnDelete:
 			dialogLoading.show();
 
@@ -74,27 +67,27 @@ public class DeleteAccountFragment extends Fragment implements OnClickListener {
 					@Override
 					public void run() {
 						final List<Boolean> list = new ArrayList<Boolean>();
-						
+
 						AndroidClient client = new AndroidClient();
 						try {
 							boolean done = client
 									.UnRegisterPhoneNumber(PreferenceManager
 											.getDefaultSharedPreferences(
-													getActivity().getApplicationContext())
+													getActivity()
+															.getApplicationContext())
 											.getString(
 													MainActivity.KEY_PHONE_NUMBER,
 													""));
-							
+
 							list.add(Boolean.valueOf(done));
-							
-							if(done){
+
+							if (done) {
 								DbHelper helper = new DbHelper(getActivity());
 								helper.DeleteAccount();
 							}
 						} catch (Exception e) {
 
-						}
-						finally{
+						} finally {
 							getActivity().runOnUiThread(new Runnable() {
 
 								@Override
@@ -102,7 +95,8 @@ public class DeleteAccountFragment extends Fragment implements OnClickListener {
 									// dismissing dialog
 									dialogLoading.dismiss();
 
-									if (list.size()>0 && list.get(0).booleanValue()) {
+									if (list.size() > 0
+											&& list.get(0).booleanValue()) {
 										dialog.setTitle("Account Deleted");
 										dialog.setMessage("Your account deleted successfully.");
 									} else {
@@ -122,14 +116,15 @@ public class DeleteAccountFragment extends Fragment implements OnClickListener {
 														int which) {
 
 													dialog.dismiss();
-													
+
 													// closing
 													// application
-													getActivity().finishAffinity();
+													getActivity()
+															.finishAffinity();
 
 												}
 											});
-									
+
 									dialog.show();
 
 								}

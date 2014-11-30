@@ -4,12 +4,20 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.google.android.gms.maps.model.LatLng;
+
 import comp231.g4.wemeet.helpers.ContactFetcher;
+import comp231.g4.wemeet.helpers.NearbyContactsDataSource;
 import comp231.g4.wemeet.helpers.RegisteredContactsDataSource;
 import comp231.g4.wemeet.helpers.SharedLocationDataSource;
 import comp231.g4.wemeet.helpers.ValidationHelper;
 import comp231.g4.wemeet.model.Contact;
 import comp231.g4.wemeet.model.ContactPhone;
+import comp231.g4.wemeet.model.NearbyContact;
 import comp231.g4.wemeet.servicehelper.AndroidClient;
 
 import android.app.AlarmManager;
@@ -31,6 +39,7 @@ import android.util.Log;
 
 public class WeMeetService extends Service implements LocationListener {
 	private Notification notification;
+	private LocationManager lManager;
 	private static final int NOTIFICATION_ID = 101;
 	public static final String KEY_LAST_SYNC = "LAST_SYNC_TIME";
 
@@ -65,18 +74,86 @@ public class WeMeetService extends Service implements LocationListener {
 			syncContacts(client); // syncing contacts
 
 			// sync shared location list
-			SyncSharedLocationList(client);
+			syncSharedLocationList(client);
 		}
 
 		setLocationListener(); // updating location on server
 
+		// updating near by contacts
+		syncNearbyContacts();
 		return super.onStartCommand(intent, flags, startId);
+	}
 
+	private void syncNearbyContacts() {
+		Thread t = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				try {
+					AndroidClient client = new AndroidClient();
+					SharedPreferences prefs = PreferenceManager
+							.getDefaultSharedPreferences(WeMeetService.this
+									.getApplicationContext());
+
+					JSONArray data = client.GetFriendsNearBy(prefs.getString(
+							MainActivity.KEY_PHONE_NUMBER, "16472787694"));
+
+					NearbyContactsDataSource dsNearbyContacts = new NearbyContactsDataSource(
+							WeMeetService.this);
+					
+					//removing old list from the table
+					dsNearbyContacts.open();
+					dsNearbyContacts.deleteAll();
+					dsNearbyContacts.close();
+
+					for (int i = 0; i < data.length(); i++) {
+						
+						try {
+							JSONObject individualData = new JSONObject(data
+									.get(i).toString());
+
+							double distance = Double.parseDouble(individualData
+									.getString("Distance"));
+							JSONObject location = individualData
+									.getJSONObject("Location");
+							String phoneNumber = individualData
+									.getString("PhoneNumber");
+
+							LatLng iLocation = new LatLng(location
+									.getDouble("Latitude"), location
+									.getDouble("Longitude"));
+							String lastSeen = location.getString("Date");
+
+							NearbyContact contact = new NearbyContact(
+									phoneNumber, iLocation, distance, lastSeen);
+
+							dsNearbyContacts.open();
+							dsNearbyContacts.addNearbyContact(contact);
+							dsNearbyContacts.close();
+							
+						} catch (Exception e) {
+							dsNearbyContacts.close(); //closing database
+						}
+					}
+
+				} catch (JSONException e) {
+					Log.e("WeMeet_Exception", "");
+
+				} catch (Exception e) {
+					Log.e("WeMeet_Exception", "");
+
+				}
+			}
+		});
+
+		t.start();
 	}
 
 	// method to set location listener
 	private void setLocationListener() {
-		LocationManager lManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+		lManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+		
 		lManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
 				(long) 600000, 200f, WeMeetService.this);
 		lManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
@@ -84,6 +161,7 @@ public class WeMeetService extends Service implements LocationListener {
 
 		Location location = lManager
 				.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		
 		if (location != null) {
 			UpdateLocation(location);
 		} else {
@@ -119,11 +197,11 @@ public class WeMeetService extends Service implements LocationListener {
 				RegisteredContactsDataSource dsRegisteredContacts = new RegisteredContactsDataSource(
 						WeMeetService.this);
 
-				 //removing all old contacts
+				// removing all old contacts
 				dsRegisteredContacts.open();
 				dsRegisteredContacts.deleteAll();
 				dsRegisteredContacts.close();
-				
+
 				// iterating through all contacts
 				for (int index = 0; index < contacts.size(); index++) {
 					try {
@@ -180,7 +258,7 @@ public class WeMeetService extends Service implements LocationListener {
 
 	}
 
-	private void SyncSharedLocationList(final AndroidClient client) {
+	private void syncSharedLocationList(final AndroidClient client) {
 
 		Thread t = new Thread(new Runnable() {
 
@@ -201,9 +279,9 @@ public class WeMeetService extends Service implements LocationListener {
 							WeMeetService.this);
 					dsSharedLocation.open();
 
-					//removing all old contacts
+					// removing all old contacts
 					dsSharedLocation.deleteAll();
-					
+
 					ContactFetcher fetcher = new ContactFetcher(
 							WeMeetService.this);
 
@@ -224,8 +302,8 @@ public class WeMeetService extends Service implements LocationListener {
 
 			}
 		});
-		
-		t.start();//starting thread
+
+		t.start();// starting thread
 	}
 
 	@SuppressWarnings("deprecation")
@@ -265,15 +343,18 @@ public class WeMeetService extends Service implements LocationListener {
 		AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 		alarmManager.set(AlarmManager.RTC_WAKEUP, calender.getTimeInMillis(),
 				pi);
+		
+		if(lManager!=null){
+			lManager.removeUpdates(this);
+		}
 	}
 
 	@Override
 	public void onLocationChanged(final Location location) {
 		UpdateLocation(location);
-
-		// ShowLocUpdateNotification(location);
 	}
-
+	
+	/*
 	private void ShowLocUpdateNotification(final Location location) {
 		Intent i = new Intent(this, MainActivity.class);
 		PendingIntent pIntent = PendingIntent.getActivity(this, 0, i, 0);
@@ -293,7 +374,8 @@ public class WeMeetService extends Service implements LocationListener {
 
 		notificationManager.notify(NOTIFICATION_ID, notification);
 	}
-
+	*/
+	
 	private void UpdateLocation(final Location location) {
 		Thread thread = new Thread(new Runnable() {
 

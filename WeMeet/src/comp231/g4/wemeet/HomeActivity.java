@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import comp231.g4.wemeet.model.NavDrawerItem;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -34,6 +35,13 @@ public class HomeActivity extends Activity {
  
     private ArrayList<NavDrawerItem> navDrawerItems;
     private NavDrawerListAdapter adapter;
+    
+    //fragments
+	private FriendsNearByFragment friendsNearbyFragment;
+	private ContactsFragment contactsFragment;
+	private LocationRequestsFragment locationRequestsFragment;
+	private GroupsFragment groupsFragment;
+	private DeleteAccountFragment deleteAccountFragment;
  
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +84,9 @@ public class HomeActivity extends Activity {
         adapter = new NavDrawerListAdapter(getApplicationContext(),
                 navDrawerItems);
         mDrawerList.setAdapter(adapter);
+        
+        //initializing fragments
+        InitializeFragments();
  
         // enabling action bar app icon and behaving it as toggle button
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -106,7 +117,15 @@ public class HomeActivity extends Activity {
         }
     }
  
-    /**
+    private void InitializeFragments() {
+    	friendsNearbyFragment = new FriendsNearByFragment();
+    	contactsFragment = new ContactsFragment();
+    	locationRequestsFragment = new LocationRequestsFragment();
+    	groupsFragment = new GroupsFragment();
+    	deleteAccountFragment = new DeleteAccountFragment();
+	}
+
+	/**
      * Slide menu item click listener
      * */
     private class SlideMenuClickListener implements
@@ -127,19 +146,19 @@ public class HomeActivity extends Activity {
         android.app.Fragment fragment = null;
         switch (position) {
         case 0:
-            fragment = new FriendsNearByFragment();
+            fragment = friendsNearbyFragment;
             break;
         case 1:
-            fragment = new ContactsFragment();
+            fragment = contactsFragment;
             break;
         case 2:
-            fragment = new LocationRequestsFragment();
+            fragment = locationRequestsFragment;
             break;
         case 3:
-            fragment = new GroupsFragment();
+            fragment = groupsFragment;
             break;
         case 4:
-            fragment = new DeleteAccountFragment();
+            fragment = deleteAccountFragment;
             break;
         default:
             break;

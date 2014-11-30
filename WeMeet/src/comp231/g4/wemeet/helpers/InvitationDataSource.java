@@ -76,7 +76,10 @@ public class InvitationDataSource {
 	}
 
 	public boolean deleteAll() {
-		return database.delete(TABLE_INVITATIONS, null, null) > 0;
+		open();
+		boolean retVal = database.delete(TABLE_INVITATIONS, null, null) > 0;
+		close();
+		return retVal;
 
 	}
 }

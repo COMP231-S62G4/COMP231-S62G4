@@ -92,7 +92,10 @@ public class SharedLocationDataSource {
 	}
 
 	public boolean deleteAll() {
-		return database.delete(TABLE_SHARED_LOCATION, null, null) > 0;
+		open();
+		boolean retVal = database.delete(TABLE_SHARED_LOCATION, null, null) > 0;
+		close();
+		return retVal;
 
 	}
 }

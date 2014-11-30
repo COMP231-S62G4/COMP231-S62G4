@@ -139,10 +139,13 @@ public class GroupsDataSource {
 		return id > 0;
 	}
 
-	/*
-	 * commented as its harmful method never call it public boolean deleteAll()
-	 * { return database.delete(TABLE_GROUPS, null, null) > 0; }
-	 */
+	public boolean deleteAll() {
+		open();
+		database.delete(TABLE_GROUP_MEMBERS, null, null);
+		boolean retVal = database.delete(TABLE_GROUPS, null, null) > 0;
+		close();
+		return retVal;
+	}
 
 	public boolean removeGroupMemeber(int groupId, GroupMember member) {
 

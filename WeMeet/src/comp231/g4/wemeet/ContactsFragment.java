@@ -43,7 +43,7 @@ public class ContactsFragment extends Fragment implements OnClickListener {
 	private ImageButton imgbtnSearch;
 	private EditText etSearch;
 	private ListView lvContacts;
-	private ArrayList<Contact> contacts;
+	private static ArrayList<Contact> contacts = null;
 	private ArrayList<Contact> listContacts;
 	private Dialog dialogLoading;
 	private AlertDialog dialogInvitation;
@@ -142,7 +142,9 @@ public class ContactsFragment extends Fragment implements OnClickListener {
 				Looper.prepare();
 
 				// fetch all contacts
-				contacts = new ContactFetcher(getActivity()).fetchAll();
+				if (contacts == null || contacts.size() == 0) {
+					contacts = new ContactFetcher(getActivity()).fetchAll();
+				}
 
 				listContacts = new ArrayList<Contact>(contacts);
 

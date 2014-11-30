@@ -240,4 +240,10 @@ public class MainActivity extends Activity {
 
 		dialog.show();
 	}
+	
+	@Override
+	protected void onRestart() {
+		super.onRestart();
+		finishAffinity();
+	}
 }

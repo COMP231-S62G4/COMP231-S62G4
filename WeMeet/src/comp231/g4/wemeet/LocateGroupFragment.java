@@ -18,7 +18,7 @@ public class LocateGroupFragment extends Fragment implements
 		OnMyLocationChangeListener {
 	private GoogleMap map;
 	private Group group;
-	private View view;
+	private static View view;
 	
 	public LocateGroupFragment(Group group){
 		this.group = group;

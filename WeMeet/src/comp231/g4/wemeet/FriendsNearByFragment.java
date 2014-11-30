@@ -1,18 +1,13 @@
 package comp231.g4.wemeet;
 
 import java.text.DecimalFormat;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
-import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMyLocationChangeListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -20,10 +15,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import comp231.g4.wemeet.servicehelper.AndroidClient;
-
+import comp231.g4.wemeet.helpers.NearbyContactsDataSource;
+import comp231.g4.wemeet.model.NearbyContact;
 import android.app.Fragment;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -32,7 +26,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.PhoneLookup;
 import android.provider.MediaStore;
@@ -45,15 +38,17 @@ import android.widget.Toast;
 public class FriendsNearByFragment extends Fragment implements
 		OnInfoWindowClickListener, OnMyLocationChangeListener {
 	// Google Map
-	private GoogleMap googleMap;
+	private static GoogleMap googleMap;
 	private Timer updateTimer;
-	private final static int UPDATE_DELAY = 1000 * 60;// updating at every 3 minutes
-	private View view;
-	
+	private final static int UPDATE_DELAY = 1000 * 60;// updating at every
+														// minute
+	private static View view;
+	private boolean isFirst = true;
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		if(view == null){
+		if (view == null) {
 			view = inflater.inflate(R.layout.activity_friends_nearby, null);
 		}
 		return view;
@@ -64,6 +59,22 @@ public class FriendsNearByFragment extends Fragment implements
 		super.onViewCreated(view, savedInstanceState);
 
 		try {
+			// initializing google map
+			googleMap = ((MapFragment) getFragmentManager().findFragmentById(
+					R.id.map)).getMap();
+			googleMap.setOnInfoWindowClickListener(this);
+
+			googleMap.setMyLocationEnabled(true);
+			googleMap.getUiSettings().setZoomControlsEnabled(true);
+			googleMap.getUiSettings().setZoomGesturesEnabled(true);
+
+			googleMap.setOnMyLocationChangeListener(this);
+
+			// check if map is created successfully or not
+			if (googleMap == null) {
+				Toast.makeText(getActivity(), "Sorry! unable to create maps",
+						Toast.LENGTH_SHORT).show();
+			}
 
 			updateTimer = new Timer();
 			updateTimer.schedule(new TimerTask() {
@@ -80,32 +91,21 @@ public class FriendsNearByFragment extends Fragment implements
 									}
 								});
 						try {
-							AndroidClient client = new AndroidClient();
-							SharedPreferences prefs = PreferenceManager
-									.getDefaultSharedPreferences(getActivity().getApplicationContext());
-							JSONArray data = client.GetFriendsNearBy(prefs
-									.getString(MainActivity.KEY_PHONE_NUMBER,
-											"16472787694"));
+							NearbyContactsDataSource dsNearby = new NearbyContactsDataSource(
+									getActivity());
+							dsNearby.open();
+							List<NearbyContact> contacts = dsNearby
+									.getNearbyContacts();
+							dsNearby.close();
 
-							for (int i = 0; i < data.length(); i++) {
+							for (int i = 0; i < contacts.size(); i++) {
 
-								JSONObject individualData = new JSONObject(data
-										.get(i).toString());
-
-								String distance = individualData
-										.getString("Distance");
-								JSONObject location = individualData
-										.getJSONObject("Location");
-								String phoneNumber = individualData
-										.getString("PhoneNumber");
-
-								LatLng iLocation = new LatLng(location
-										.getDouble("Latitude"), location
-										.getDouble("Longitude"));
+								NearbyContact currentContact = contacts.get(i);
 
 								final MarkerOptions marker = GetContactDetails(
-										phoneNumber,
-										Double.parseDouble(distance), iLocation);
+										currentContact.phoneNumber,
+										currentContact.distance,
+										currentContact.location);
 
 								Handler handler = new Handler(Looper
 										.getMainLooper());
@@ -114,23 +114,16 @@ public class FriendsNearByFragment extends Fragment implements
 									@Override
 									public void run() {
 										googleMap.addMarker(marker);
-										Log.e("Marker adder", marker.getTitle());
 									}
 								});
 
 							}
-						} catch (JSONException e) {
-							Log.e("WeMeet_Exception", "");
-
-						}catch (Exception e) {
+						} catch (Exception e) {
 							Log.e("WeMeet_Exception", "");
 						}
 					}
 				}
 			}, UPDATE_DELAY / 5, UPDATE_DELAY);
-
-			// Loading map
-			initilizeMap();
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -193,42 +186,12 @@ public class FriendsNearByFragment extends Fragment implements
 		return Double.valueOf(twoDForm.format(d));
 	}
 
-	/**
-	 * function to load map. If map is not created it will create it for you
-	 * */
-	private void initilizeMap() {
-		if (googleMap == null) {
-			googleMap = ((MapFragment) getFragmentManager().findFragmentById(
-					R.id.map)).getMap();
-
-			googleMap.setOnInfoWindowClickListener(this);
-			
-			googleMap.setMyLocationEnabled(true);
-			googleMap.getUiSettings().setZoomControlsEnabled(true);
-			googleMap.getUiSettings().setZoomGesturesEnabled(true);
-
-			googleMap.setOnMyLocationChangeListener(this);
-
-			// check if map is created successfully or not
-			if (googleMap == null) {
-				Toast.makeText(getActivity(), "Sorry! unable to create maps",
-						Toast.LENGTH_SHORT).show();
-			}
-		}
-	}
-
 	@Override
 	public void onPause() {
 		super.onPause();
-		if(updateTimer!=null){
+		if (updateTimer != null) {
 			updateTimer.cancel();
 		}
-	}
-	
-	@Override
-	public void onResume() {
-		super.onResume();
-		initilizeMap();
 	}
 
 	@Override
@@ -241,6 +204,11 @@ public class FriendsNearByFragment extends Fragment implements
 	public void onMyLocationChange(Location location) {
 		LatLng coordinate = new LatLng(location.getLatitude(),
 				location.getLongitude());
-		googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinate, 12));
+		if (isFirst) {
+			googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinate,
+					12));
+			isFirst = false;
+			googleMap.setOnMyLocationChangeListener(null);
+		}
 	}
 }

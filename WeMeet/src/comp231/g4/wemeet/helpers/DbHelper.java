@@ -23,6 +23,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		db.execSQL(GroupsDataSource.CREATE_GROUPS);
 		db.execSQL(GroupsDataSource.CREATE_GROUP_MEMBERS);
 		db.execSQL(SharedLocationDataSource.CREATE_SHARED_LOCATION);
+		db.execSQL(NearbyContactsDataSource.CREATE_NEARBY_CONTACTS);
 	}
 
 	@Override
@@ -32,8 +33,20 @@ public class DbHelper extends SQLiteOpenHelper {
 	}
 
 	public void DeleteAccount() {
+		//removing all local data
 		RegisteredContactsDataSource dsRegisteredContacts = new RegisteredContactsDataSource(_context);
 		dsRegisteredContacts.deleteAll();
 		
+		InvitationDataSource dsInvitations = new InvitationDataSource(_context);
+		dsInvitations.deleteAll();
+		
+		GroupsDataSource dsGroups = new GroupsDataSource(_context);
+		dsGroups.deleteAll();
+		
+		SharedLocationDataSource dsSharedLocations = new SharedLocationDataSource(_context);
+		dsSharedLocations.deleteAll();
+		
+		NearbyContactsDataSource dsNearby = new NearbyContactsDataSource(_context);
+		dsNearby.deleteAll();
 	}
 }
