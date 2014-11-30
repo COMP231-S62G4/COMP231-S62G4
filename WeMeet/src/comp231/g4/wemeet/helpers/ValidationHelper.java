@@ -1,5 +1,7 @@
 package comp231.g4.wemeet.helpers;
 
+import java.text.DecimalFormat;
+
 public class ValidationHelper {
 	public static boolean IsValidPhoneNumber(String phoneNumber) {
 		// validating for length
@@ -22,5 +24,10 @@ public class ValidationHelper {
 		phoneNumber = phoneNumber.replace("+", "");
 		
 		return phoneNumber;
+	}
+
+	public static double RoundTwoDecimals(double d) {
+		DecimalFormat twoDForm = new DecimalFormat("#.##");
+		return Double.valueOf(twoDForm.format(d));
 	}
 }

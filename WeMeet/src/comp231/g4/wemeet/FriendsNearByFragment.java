@@ -16,6 +16,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import comp231.g4.wemeet.helpers.NearbyContactsDataSource;
+import comp231.g4.wemeet.helpers.ValidationHelper;
 import comp231.g4.wemeet.model.NearbyContact;
 import android.app.Fragment;
 import android.database.Cursor;
@@ -158,7 +159,7 @@ public class FriendsNearByFragment extends Fragment implements
 				String photo_uri = cursor
 						.getString(ColumeIndex_PHOTO_THUMBNAIL_URI);
 
-				marker.title(name + " - " + roundTwoDecimals(distance) + " km");
+				marker.title(name + " - " + ValidationHelper.RoundTwoDecimals(distance) + " km");
 				Bitmap bitmap;
 
 				if (photo_uri != null) {
@@ -179,11 +180,6 @@ public class FriendsNearByFragment extends Fragment implements
 			cursor.close();
 		}
 		return marker;
-	}
-
-	public double roundTwoDecimals(double d) {
-		DecimalFormat twoDForm = new DecimalFormat("#.##");
-		return Double.valueOf(twoDForm.format(d));
 	}
 
 	@Override

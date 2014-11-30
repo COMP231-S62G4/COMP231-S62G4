@@ -67,7 +67,7 @@ public class GroupMembersFragment extends Fragment implements
 		// set activity title to group name
 		getActivity().setTitle(groupName);
 
-		// initializing add group dialog
+		// initializing zero group member alert dialog
 		dialog = new AlertDialog.Builder(getActivity())
 				.setIcon(android.R.drawable.ic_dialog_alert)
 				.setCancelable(false).create();
@@ -96,11 +96,11 @@ public class GroupMembersFragment extends Fragment implements
 	@Override
 	public void onResume() {
 		super.onResume();
-		
+
 		// set activity title to group name
 		getActivity().setTitle(groupName);
 	}
-	
+
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
@@ -165,7 +165,7 @@ public class GroupMembersFragment extends Fragment implements
 				Toast.makeText(getActivity(),
 						"Your location sharing list is empty.",
 						Toast.LENGTH_SHORT).show();
-			}else{
+			} else {
 				// setting adapter
 				AddGroupMemeberAdapter adapter = new AddGroupMemeberAdapter(
 						getActivity(), new ArrayList<Contact>(
@@ -179,15 +179,18 @@ public class GroupMembersFragment extends Fragment implements
 
 			return true;
 		case R.id.item_locate_members:
+			if (groupMembers.size() > 0) {
+				// opening locate group members fragment
+				Group group = new Group(groupId, groupName);
+				LocateGroupFragment fragment = new LocateGroupFragment(group);
 
-			//opening locate group members fragment
-			Group group = new Group(groupId, groupName);
-			LocateGroupFragment fragment = new LocateGroupFragment(group);
-			
-			FragmentManager manager = getFragmentManager();
-			manager.beginTransaction()
-			.replace(R.id.content_frame, fragment).addToBackStack(null).commit();
-
+				FragmentManager manager = getFragmentManager();
+				manager.beginTransaction()
+						.replace(R.id.content_frame, fragment)
+						.addToBackStack(null).commit();
+			}else{
+				dialog.show();
+			}
 			return true;
 
 		default:
