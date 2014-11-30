@@ -66,16 +66,16 @@ public class WeMeetService extends Service implements LocationListener {
 		notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
 		notificationManager.notify(NOTIFICATION_ID, notification);
+		// creating instance of client
+		AndroidClient client = new AndroidClient();
 
 		if (!syncedToday()) {
-			// creating instance of client
-			AndroidClient client = new AndroidClient();
 
 			syncContacts(client); // syncing contacts
 
-			// sync shared location list
-			syncSharedLocationList(client);
 		}
+		// sync shared location list
+		syncSharedLocationList(client);
 
 		setLocationListener(); // updating location on server
 
@@ -101,14 +101,14 @@ public class WeMeetService extends Service implements LocationListener {
 
 					NearbyContactsDataSource dsNearbyContacts = new NearbyContactsDataSource(
 							WeMeetService.this);
-					
-					//removing old list from the table
+
+					// removing old list from the table
 					dsNearbyContacts.open();
 					dsNearbyContacts.deleteAll();
 					dsNearbyContacts.close();
 
 					for (int i = 0; i < data.length(); i++) {
-						
+
 						try {
 							JSONObject individualData = new JSONObject(data
 									.get(i).toString());
@@ -131,9 +131,9 @@ public class WeMeetService extends Service implements LocationListener {
 							dsNearbyContacts.open();
 							dsNearbyContacts.addNearbyContact(contact);
 							dsNearbyContacts.close();
-							
+
 						} catch (Exception e) {
-							dsNearbyContacts.close(); //closing database
+							dsNearbyContacts.close(); // closing database
 						}
 					}
 
@@ -153,7 +153,7 @@ public class WeMeetService extends Service implements LocationListener {
 	// method to set location listener
 	private void setLocationListener() {
 		lManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-		
+
 		lManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
 				(long) 600000, 200f, WeMeetService.this);
 		lManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
@@ -161,7 +161,7 @@ public class WeMeetService extends Service implements LocationListener {
 
 		Location location = lManager
 				.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		
+
 		if (location != null) {
 			UpdateLocation(location);
 		} else {
@@ -291,6 +291,7 @@ public class WeMeetService extends Service implements LocationListener {
 						if (sharedLocationListItem[i].length() > 2) {
 							Contact contact = fetcher
 									.GetContactDetails(sharedLocationListItem[i]);
+							dsSharedLocation.open();
 							dsSharedLocation.addContact(contact);
 						}
 					}
@@ -343,8 +344,8 @@ public class WeMeetService extends Service implements LocationListener {
 		AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 		alarmManager.set(AlarmManager.RTC_WAKEUP, calender.getTimeInMillis(),
 				pi);
-		
-		if(lManager!=null){
+
+		if (lManager != null) {
 			lManager.removeUpdates(this);
 		}
 	}
@@ -353,29 +354,25 @@ public class WeMeetService extends Service implements LocationListener {
 	public void onLocationChanged(final Location location) {
 		UpdateLocation(location);
 	}
-	
+
 	/*
-	private void ShowLocUpdateNotification(final Location location) {
-		Intent i = new Intent(this, MainActivity.class);
-		PendingIntent pIntent = PendingIntent.getActivity(this, 0, i, 0);
+	 * private void ShowLocUpdateNotification(final Location location) { Intent
+	 * i = new Intent(this, MainActivity.class); PendingIntent pIntent =
+	 * PendingIntent.getActivity(this, 0, i, 0);
+	 * 
+	 * // Build notification // Actions are just fake notification = new
+	 * Notification.Builder(this) .setContentTitle("WeMeet Service")
+	 * .setContentText( String.valueOf(location.getLatitude()) + " " +
+	 * String.valueOf(location.getLongitude()))
+	 * .setContentIntent(pIntent).setSmallIcon(R.drawable.ic_launcher)
+	 * .setContentIntent(pIntent).build(); NotificationManager
+	 * notificationManager = (NotificationManager)
+	 * getSystemService(NOTIFICATION_SERVICE); // hide the notification after
+	 * its selected notification.flags |= Notification.FLAG_AUTO_CANCEL;
+	 * 
+	 * notificationManager.notify(NOTIFICATION_ID, notification); }
+	 */
 
-		// Build notification
-		// Actions are just fake
-		notification = new Notification.Builder(this)
-				.setContentTitle("WeMeet Service")
-				.setContentText(
-						String.valueOf(location.getLatitude()) + " "
-								+ String.valueOf(location.getLongitude()))
-				.setContentIntent(pIntent).setSmallIcon(R.drawable.ic_launcher)
-				.setContentIntent(pIntent).build();
-		NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		// hide the notification after its selected
-		notification.flags |= Notification.FLAG_AUTO_CANCEL;
-
-		notificationManager.notify(NOTIFICATION_ID, notification);
-	}
-	*/
-	
 	private void UpdateLocation(final Location location) {
 		Thread thread = new Thread(new Runnable() {
 
