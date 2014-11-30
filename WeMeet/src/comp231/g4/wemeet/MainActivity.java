@@ -182,12 +182,14 @@ public class MainActivity extends Activity {
 									// code to launch Authentication activity
 									Intent i = new Intent(MainActivity.this,
 											AuthenticationActivity.class);
+									i.addFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME);
 									startActivity(i);
 								} else {
 									// code to launch FriendsNearBy activity
 									Intent i = new Intent(MainActivity.this,
 											HomeActivity.class);
 									i.putExtra(TAG_FIRST_LAUNCH, true);
+									i.addFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME);
 									startActivity(i);
 								}
 							}
