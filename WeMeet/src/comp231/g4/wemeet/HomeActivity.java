@@ -42,6 +42,7 @@ public class HomeActivity extends Activity {
 	private LocationRequestsFragment locationRequestsFragment;
 	private GroupsFragment groupsFragment;
 	private DeleteAccountFragment deleteAccountFragment;
+	private SettingsFragment settingsFragment;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +79,8 @@ public class HomeActivity extends Activity {
 				.getResourceId(3, -1)));
 		navDrawerItems.add(new NavDrawerItem(navMenuTitles[4], navMenuIcons
 				.getResourceId(4, -1)));
+		navDrawerItems.add(new NavDrawerItem(navMenuTitles[5], navMenuIcons
+				.getResourceId(5, -1)));
 
 		// Recycle the typed array
 		navMenuIcons.recycle();
@@ -128,6 +131,7 @@ public class HomeActivity extends Activity {
 		contactsFragment = new ContactsFragment();
 		locationRequestsFragment = new LocationRequestsFragment();
 		groupsFragment = new GroupsFragment();
+		settingsFragment = new SettingsFragment();
 		deleteAccountFragment = new DeleteAccountFragment();
 	}
 
@@ -164,6 +168,9 @@ public class HomeActivity extends Activity {
 			fragment = groupsFragment;
 			break;
 		case 4:
+			fragment = settingsFragment;
+			break;
+		case 5:
 			fragment = deleteAccountFragment;
 			break;
 		default:
