@@ -21,6 +21,7 @@ import comp231.g4.wemeet.model.NearbyContact;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.database.Cursor;
@@ -43,6 +44,7 @@ public class LocateGroupFragment extends Fragment implements
 	private GoogleMap map;
 	private Group group;
 	private AlertDialog dialog;
+	private MapFragment mapFragment;
 	private static View view;
 
 	public LocateGroupFragment(Group group) {
@@ -52,10 +54,8 @@ public class LocateGroupFragment extends Fragment implements
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		if (view == null) {
-			view = inflater.inflate(R.layout.activity_locate_group, null);
-		}
-		return view;
+
+		return inflater.inflate(R.layout.activity_locate_group, null);
 	}
 
 	@Override
@@ -65,10 +65,25 @@ public class LocateGroupFragment extends Fragment implements
 		// initializing components
 		InitializeComponents();
 	}
+	
+	@Override
+	public void onDestroyView() {
+		try {
+			FragmentTransaction ft = getActivity().getFragmentManager()
+					.beginTransaction();
+			ft.remove(mapFragment).commit();
+			getActivity().getFragmentManager().executePendingTransactions();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally{
+			super.onDestroyView();
+		}
+	}
 
 	private void InitializeComponents() {
-		map = ((MapFragment) getActivity().getFragmentManager()
-				.findFragmentById(R.id.locateMembersMap)).getMap();
+		mapFragment = ((MapFragment) getActivity().getFragmentManager()
+				.findFragmentById(R.id.locateMembersMap));
+		map = mapFragment.getMap();
 
 		map.setMyLocationEnabled(true);
 		map.setOnMyLocationChangeListener(this);
@@ -118,7 +133,7 @@ public class LocateGroupFragment extends Fragment implements
 																	// current
 																	// group
 																	// member
-						
+
 						for (int j = 0; j < nearbyContacts.size(); j++) {
 							NearbyContact nearbyContact = nearbyContacts.get(j); // fetching
 																					// current
@@ -127,7 +142,7 @@ public class LocateGroupFragment extends Fragment implements
 																					// contact
 							if (nearbyContact.phoneNumber.equals(member.number)) {
 								markersAdded++;
-								
+
 								final MarkerOptions marker = GetContactDetails(
 										nearbyContact.phoneNumber,
 										nearbyContact.distance,
@@ -146,8 +161,8 @@ public class LocateGroupFragment extends Fragment implements
 							}
 						}
 					}
-					if(markersAdded==0){
-						dialog.show();//no one is nearby
+					if (markersAdded == 0) {
+						dialog.show();// no one is nearby
 					}
 				} else {
 					dialog.show();

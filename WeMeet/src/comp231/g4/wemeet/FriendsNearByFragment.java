@@ -1,6 +1,5 @@
 package comp231.g4.wemeet;
 
-import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -19,6 +18,7 @@ import comp231.g4.wemeet.helpers.NearbyContactsDataSource;
 import comp231.g4.wemeet.helpers.ValidationHelper;
 import comp231.g4.wemeet.model.NearbyContact;
 import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -39,20 +39,32 @@ import android.widget.Toast;
 public class FriendsNearByFragment extends Fragment implements
 		OnInfoWindowClickListener, OnMyLocationChangeListener {
 	// Google Map
-	private static GoogleMap googleMap;
+	private GoogleMap googleMap;
+	private MapFragment mapFragment;
 	private Timer updateTimer;
 	private final static int UPDATE_DELAY = 1000 * 60;// updating at every
-														// minute
-	private static View view;
+
 	private boolean isFirst = true;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		if (view == null) {
-			view = inflater.inflate(R.layout.activity_friends_nearby, null);
+		return inflater.inflate(R.layout.activity_friends_nearby, null);
+	}
+
+	@Override
+	public void onDestroyView() {
+
+		try {
+			FragmentTransaction ft = getActivity().getFragmentManager()
+					.beginTransaction();
+			ft.remove(mapFragment).commit();
+			getActivity().getFragmentManager().executePendingTransactions();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally{
+			super.onDestroyView();
 		}
-		return view;
 	}
 
 	@Override
@@ -61,8 +73,9 @@ public class FriendsNearByFragment extends Fragment implements
 
 		try {
 			// initializing google map
-			googleMap = ((MapFragment) getFragmentManager().findFragmentById(
-					R.id.map)).getMap();
+			mapFragment = ((MapFragment) getFragmentManager().findFragmentById(
+					R.id.map));
+			googleMap = mapFragment.getMap();
 			googleMap.setOnInfoWindowClickListener(this);
 
 			googleMap.setMyLocationEnabled(true);
@@ -128,6 +141,7 @@ public class FriendsNearByFragment extends Fragment implements
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			Log.e("WeMeetException", e.getMessage());
 		}
 	}
 
@@ -159,7 +173,8 @@ public class FriendsNearByFragment extends Fragment implements
 				String photo_uri = cursor
 						.getString(ColumeIndex_PHOTO_THUMBNAIL_URI);
 
-				marker.title(name + " - " + ValidationHelper.RoundTwoDecimals(distance) + " km");
+				marker.title(name + " - "
+						+ ValidationHelper.RoundTwoDecimals(distance) + " km");
 				Bitmap bitmap;
 
 				if (photo_uri != null) {

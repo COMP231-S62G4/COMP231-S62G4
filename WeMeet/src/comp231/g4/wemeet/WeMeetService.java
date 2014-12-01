@@ -25,12 +25,15 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
@@ -69,7 +72,7 @@ public class WeMeetService extends Service implements LocationListener {
 		// creating instance of client
 		AndroidClient client = new AndroidClient();
 
-		if (!syncedToday()) {
+		if (isNetworkAvailable() && !syncedToday()) {
 
 			syncContacts(client); // syncing contacts
 
@@ -264,43 +267,46 @@ public class WeMeetService extends Service implements LocationListener {
 
 			@Override
 			public void run() {
+				if (isNetworkAvailable()) {
 
-				String phoneNumber = PreferenceManager
-						.getDefaultSharedPreferences(
-								WeMeetService.this.getApplicationContext())
-						.getString(MainActivity.KEY_PHONE_NUMBER, "16472787694");
-				phoneNumber = ValidationHelper.SanitizePhoneNumber(phoneNumber);
+					String phoneNumber = PreferenceManager
+							.getDefaultSharedPreferences(
+									WeMeetService.this.getApplicationContext())
+							.getString(MainActivity.KEY_PHONE_NUMBER,
+									"");
+					phoneNumber = ValidationHelper
+							.SanitizePhoneNumber(phoneNumber);
 
-				try {
-					String sharedLocationList = client
-							.getSharedLocationList(phoneNumber);
+					try {
+						String sharedLocationList = client
+								.getSharedLocationList(phoneNumber);
 
-					SharedLocationDataSource dsSharedLocation = new SharedLocationDataSource(
-							WeMeetService.this);
-					dsSharedLocation.open();
+						SharedLocationDataSource dsSharedLocation = new SharedLocationDataSource(
+								WeMeetService.this);
+						dsSharedLocation.open();
 
-					// removing all old contacts
-					dsSharedLocation.deleteAll();
+						// removing all old contacts
+						dsSharedLocation.deleteAll();
 
-					ContactFetcher fetcher = new ContactFetcher(
-							WeMeetService.this);
+						ContactFetcher fetcher = new ContactFetcher(
+								WeMeetService.this);
 
-					String[] sharedLocationListItem = sharedLocationList
-							.split(",");
-					for (int i = 0; i < sharedLocationListItem.length; i++) {
-						if (sharedLocationListItem[i].length() > 2) {
-							Contact contact = fetcher
-									.GetContactDetails(sharedLocationListItem[i]);
-							dsSharedLocation.open();
-							dsSharedLocation.addContact(contact);
+						String[] sharedLocationListItem = sharedLocationList
+								.split(",");
+						for (int i = 0; i < sharedLocationListItem.length; i++) {
+							if (sharedLocationListItem[i].length() > 2) {
+								Contact contact = fetcher
+										.GetContactDetails(sharedLocationListItem[i]);
+								dsSharedLocation.open();
+								dsSharedLocation.addContact(contact);
+							}
 						}
+
+						dsSharedLocation.close();
+					} catch (Exception e) {
+						Log.e("WeMeet_Exception", e.getMessage());
 					}
-
-					dsSharedLocation.close();
-				} catch (Exception e) {
-					Log.e("WeMeet_Exception", e.getMessage());
 				}
-
 			}
 		});
 
@@ -383,7 +389,9 @@ public class WeMeetService extends Service implements LocationListener {
 						.getDefaultSharedPreferences(WeMeetService.this
 								.getApplicationContext());
 				try {
-					if (prefs.getBoolean(MainActivity.KEY_IS_REGISTERED, false)) {
+					if (isNetworkAvailable()
+							&& prefs.getBoolean(MainActivity.KEY_IS_REGISTERED,
+									false)) {
 						client.UpdateLocation(prefs.getString(
 								MainActivity.KEY_PHONE_NUMBER, ""), String
 								.valueOf(location.getLatitude()), String
@@ -397,6 +405,14 @@ public class WeMeetService extends Service implements LocationListener {
 		});
 
 		thread.start();
+	}
+
+	// method to check Internet availability
+	private boolean isNetworkAvailable() {
+		ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo activeNetworkInfo = connectivityManager
+				.getActiveNetworkInfo();
+		return activeNetworkInfo != null && activeNetworkInfo.isConnected();
 	}
 
 	@Override

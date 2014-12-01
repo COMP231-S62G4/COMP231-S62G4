@@ -5,12 +5,14 @@ import comp231.g4.wemeet.helpers.ValidationHelper;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class AuthenticationActivity extends Activity implements OnClickListener {
 	private EditText etPassword;
@@ -48,8 +50,17 @@ public class AuthenticationActivity extends Activity implements OnClickListener 
 				// code to launch FriendsNearBy activity
 				Intent i = new Intent(AuthenticationActivity.this,
 						HomeActivity.class);
+				i.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 				i.addFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME);
 				startActivity(i);
+				
+				Toast.makeText(AuthenticationActivity.this, "Entering into secure zone!", Toast.LENGTH_SHORT).show();
+			}else{
+				etPassword.setText("");
+				etPassword.setError("Invalid password!");
+				etPassword.setBackgroundColor(Color.parseColor("#C20000"));
+				etPassword.setTextColor(Color.WHITE);
+				Toast.makeText(AuthenticationActivity.this, "Invalid password!", Toast.LENGTH_SHORT).show();
 			}
 			break;
 
