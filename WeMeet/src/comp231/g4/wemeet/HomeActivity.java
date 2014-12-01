@@ -228,4 +228,11 @@ public class HomeActivity extends Activity {
 
 		return super.onOptionsItemSelected(item);
 	}
+	
+	@Override
+	protected void onDestroy() {
+		try{
+			super.onDestroy();
+		}catch (Exception e) {	}
+	}
 }

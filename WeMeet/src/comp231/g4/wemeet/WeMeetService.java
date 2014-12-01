@@ -243,9 +243,19 @@ public class WeMeetService extends Service implements LocationListener {
 					.setSmallIcon(R.drawable.ic_launcher)
 					.setContentIntent(pIntent).build();
 
-						NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+			if (prefs.getBoolean(SettingsFragment.KEY_NOTIFICATION_SOUND, true)) {
+				notification.defaults |= Notification.DEFAULT_SOUND;
+			}
+
+			notification.ledARGB = 0xff00ff00;
+			notification.ledOnMS = 300;
+			notification.ledOffMS = 1000;
+
+			NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			// hide the notification after its selected
 			notification.flags |= Notification.FLAG_AUTO_CANCEL;
+			notification.flags |= Notification.FLAG_SHOW_LIGHTS;
+
 			notificationManager.notify(NOTIFICATION_ID, notification);
 		}
 	}
