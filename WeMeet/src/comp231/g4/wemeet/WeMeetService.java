@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -45,30 +46,18 @@ public class WeMeetService extends Service implements LocationListener {
 	private LocationManager lManager;
 	private static final int NOTIFICATION_ID = 101;
 	public static final String KEY_LAST_SYNC = "LAST_SYNC_TIME";
-
-	@Override
-	public IBinder onBind(Intent intent) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	private static final String NOTIFICATION_TITLE = "WeMeet";
+	private SharedPreferences prefs;
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Intent i = new Intent(this, MainActivity.class);
-		PendingIntent pIntent = PendingIntent.getActivity(this, 0, i, 0);
+		prefs = PreferenceManager
+				.getDefaultSharedPreferences(WeMeetService.this
+						.getApplicationContext());
 
-		// Build notification
-		// Actions are just fake
-		notification = new Notification.Builder(this)
-				.setContentTitle("WeMeet Service")
-				.setContentText("Service started.")
-				.setSmallIcon(R.drawable.ic_launcher).setContentIntent(pIntent)
-				.build();
-		NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		// hide the notification after its selected
-		notification.flags |= Notification.FLAG_AUTO_CANCEL;
+		// showing notification
+		showNotification("Service started.");
 
-		notificationManager.notify(NOTIFICATION_ID, notification);
 		// creating instance of client
 		AndroidClient client = new AndroidClient();
 
@@ -95,12 +84,9 @@ public class WeMeetService extends Service implements LocationListener {
 
 				try {
 					AndroidClient client = new AndroidClient();
-					SharedPreferences prefs = PreferenceManager
-							.getDefaultSharedPreferences(WeMeetService.this
-									.getApplicationContext());
 
 					JSONArray data = client.GetFriendsNearBy(prefs.getString(
-							MainActivity.KEY_PHONE_NUMBER, "16472787694"));
+							MainActivity.KEY_PHONE_NUMBER, ""));
 
 					NearbyContactsDataSource dsNearbyContacts = new NearbyContactsDataSource(
 							WeMeetService.this);
@@ -183,10 +169,6 @@ public class WeMeetService extends Service implements LocationListener {
 			@Override
 			public void run() {
 				// getting shared preferences
-				SharedPreferences prefs = PreferenceManager
-						.getDefaultSharedPreferences(WeMeetService.this
-								.getApplicationContext());
-
 				Editor editor = prefs.edit();
 
 				// list to hold contacts
@@ -243,22 +225,29 @@ public class WeMeetService extends Service implements LocationListener {
 
 				editor.putString(KEY_LAST_SYNC, new Date().toString());
 				editor.commit();
-
-				notification = new Notification.Builder(WeMeetService.this)
-						.setContentTitle("WeMeet Service")
-						.setContentText("Contacts synced.")
-						.setSmallIcon(R.drawable.ic_launcher).build();
-
-				NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-				// hide the notification after its selected
-				notification.flags |= Notification.FLAG_AUTO_CANCEL;
-
-				notificationManager.notify(NOTIFICATION_ID, notification);
 			}
 		});
 
 		thread.start();
 
+	}
+
+	private void showNotification(String message) {
+		if (prefs.getBoolean(SettingsFragment.KEY_NOTIFICATION, true)) {
+			Intent i = new Intent(this, MainActivity.class);
+			PendingIntent pIntent = PendingIntent.getActivity(this, 0, i, 0);
+
+			notification = new Notification.Builder(WeMeetService.this)
+					.setContentTitle(NOTIFICATION_TITLE)
+					.setContentText(message)
+					.setSmallIcon(R.drawable.ic_launcher)
+					.setContentIntent(pIntent).build();
+
+						NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+			// hide the notification after its selected
+			notification.flags |= Notification.FLAG_AUTO_CANCEL;
+			notificationManager.notify(NOTIFICATION_ID, notification);
+		}
 	}
 
 	private void syncSharedLocationList(final AndroidClient client) {
@@ -269,11 +258,8 @@ public class WeMeetService extends Service implements LocationListener {
 			public void run() {
 				if (isNetworkAvailable()) {
 
-					String phoneNumber = PreferenceManager
-							.getDefaultSharedPreferences(
-									WeMeetService.this.getApplicationContext())
-							.getString(MainActivity.KEY_PHONE_NUMBER,
-									"");
+					String phoneNumber = prefs.getString(
+							MainActivity.KEY_PHONE_NUMBER, "");
 					phoneNumber = ValidationHelper
 							.SanitizePhoneNumber(phoneNumber);
 
@@ -315,9 +301,6 @@ public class WeMeetService extends Service implements LocationListener {
 
 	@SuppressWarnings("deprecation")
 	private boolean syncedToday() {
-		SharedPreferences prefs = PreferenceManager
-				.getDefaultSharedPreferences(WeMeetService.this
-						.getApplicationContext());
 		if (prefs.contains(KEY_LAST_SYNC)) {
 			Date current = new Date();
 
@@ -385,9 +368,6 @@ public class WeMeetService extends Service implements LocationListener {
 			@Override
 			public void run() {
 				AndroidClient client = new AndroidClient();
-				SharedPreferences prefs = PreferenceManager
-						.getDefaultSharedPreferences(WeMeetService.this
-								.getApplicationContext());
 				try {
 					if (isNetworkAvailable()
 							&& prefs.getBoolean(MainActivity.KEY_IS_REGISTERED,
@@ -431,6 +411,12 @@ public class WeMeetService extends Service implements LocationListener {
 	public void onProviderDisabled(String provider) {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public IBinder onBind(Intent intent) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

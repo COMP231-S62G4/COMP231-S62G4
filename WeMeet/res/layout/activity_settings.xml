@@ -5,11 +5,11 @@
     android:orientation="vertical" >
 
     <Switch
-        android:id="@+id/switchNotificationSound"
+        android:id="@+id/switchNotification"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="10dp"
-        android:text="Notification Sound"
+        android:text="Notification"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <View
@@ -18,11 +18,11 @@
         android:background="#CCC" />
 
     <Switch
-        android:id="@+id/switchNotification"
+        android:id="@+id/switchNotificationSound"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="10dp"
-        android:text="Notification"
+        android:text="Notification Sound"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <View
