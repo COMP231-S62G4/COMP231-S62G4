@@ -41,25 +41,27 @@ public class SettingsFragment extends Fragment implements
 
 	private void InitializeComponenets() {
 		try {
-			switchNotification = (Switch) getActivity().findViewById(
-					R.id.switchNotification);
-			switchNotification.setOnCheckedChangeListener(this);
-
-			switchNotificationSound = (Switch) getActivity().findViewById(
-					R.id.switchNotificationSound);
-			switchNotificationSound.setOnCheckedChangeListener(this);
-
 			prefs = PreferenceManager.getDefaultSharedPreferences(getActivity()
 					.getApplicationContext());
 
-			//loading default values
+			switchNotification = (Switch) getActivity().findViewById(
+					R.id.switchNotification);
+			
+			switchNotificationSound = (Switch) getActivity().findViewById(
+					R.id.switchNotificationSound);
+			
+			// loading default values
 			boolean enableNotification = prefs.getBoolean(KEY_NOTIFICATION,
 					true);
 			switchNotification.setChecked(enableNotification);
+
+			boolean enableNotificationSound = prefs.getBoolean(
+					KEY_NOTIFICATION_SOUND, true);
 			
-			boolean enableNotificationSound = prefs.getBoolean(KEY_NOTIFICATION_SOUND,
-					true);
-			switchNotification.setChecked(enableNotificationSound);
+			switchNotificationSound.setChecked(enableNotificationSound);
+
+			switchNotification.setOnCheckedChangeListener(this);
+			switchNotificationSound.setOnCheckedChangeListener(this);
 			
 			btnAbout = (Button) getActivity().findViewById(R.id.btnAbout);
 			btnAbout.setOnClickListener(this);
@@ -87,7 +89,7 @@ public class SettingsFragment extends Fragment implements
 
 		editor.commit();
 	}
-	
+
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -96,12 +98,11 @@ public class SettingsFragment extends Fragment implements
 
 	@Override
 	public void onClick(View v) {
-		if(v == btnAbout){
+		if (v == btnAbout) {
 			Fragment fragment = new AboutFragment();
-			
+
 			FragmentManager manager = getFragmentManager();
-			manager.beginTransaction()
-					.replace(R.id.content_frame, fragment)
+			manager.beginTransaction().replace(R.id.content_frame, fragment)
 					.addToBackStack(null).commit();
 		}
 	}
