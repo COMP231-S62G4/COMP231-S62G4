@@ -17,7 +17,8 @@ public class AboutFragment extends Fragment {
 	public void onResume() {
 		super.onResume();
 		getActivity().setTitle("About");
-		getActivity().getActionBar().setDisplayShowHomeEnabled(true);
+		
 		getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
+		getActivity().getActionBar().setIcon(R.drawable.ic_groups);
 	}
 }

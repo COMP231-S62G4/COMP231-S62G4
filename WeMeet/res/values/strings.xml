@@ -33,6 +33,8 @@
     </string>
     
     <string name="str_invitation">You are invited to install WeMeet application.</string>
+    <string name="str_version">V 1.0</string>
+    <string name="str_copyright">Copyright &#169; 2014\n All Rights Reserved.</string>
     
     <string-array name="arr_supported_countries">
         <item>Canada +1</item>
