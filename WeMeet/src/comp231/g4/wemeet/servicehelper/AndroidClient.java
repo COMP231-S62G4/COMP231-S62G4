@@ -21,7 +21,9 @@ import android.util.Log;
 import com.google.android.gms.maps.model.LatLng;
 
 public class AndroidClient {
-	private static final String baseURL = "http://192.168.0.104/WeMeetService/WeMeetService.svc/json/";
+	
+	private static final String baseURL = "http://10.24.68.148/WeMeetService/WeMeetService.svc/json/";
+	//private static final String baseURL = "http://192.168.0.104/WeMeetService/WeMeetService.svc/json/";
 
 	public boolean RegisterPhoneNumber(String phoneNumber) throws Exception {
 		return Boolean

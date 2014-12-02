@@ -80,4 +80,10 @@ public class SettingsFragment extends Fragment implements
 
 		editor.commit();
 	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		getActivity().setTitle("Settings");
+	}
 }
