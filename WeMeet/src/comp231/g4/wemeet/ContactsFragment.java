@@ -392,4 +392,12 @@ public class ContactsFragment extends Fragment implements OnClickListener {
 		}
 
 	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+
+		getActivity().setTitle("Contacts");
+		getActivity().getActionBar().setIcon(R.drawable.ic_contacts_details);
+	}
 }

@@ -270,5 +270,6 @@ public class GroupsFragment extends Fragment implements OnClickListener,
 		
 		// set activity title to group name
 		getActivity().setTitle("Groups");
+		getActivity().getActionBar().setIcon(R.drawable.ic_groups);
 	}
 }

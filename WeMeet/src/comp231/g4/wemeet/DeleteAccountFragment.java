@@ -143,5 +143,12 @@ public class DeleteAccountFragment extends Fragment implements OnClickListener {
 			break;
 		}
 	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		getActivity().setTitle("Delete Account");
+		getActivity().getActionBar().setIcon(R.drawable.ic_delete_account);
+	}
 
 }

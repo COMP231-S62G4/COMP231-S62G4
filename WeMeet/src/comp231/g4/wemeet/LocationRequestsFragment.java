@@ -69,6 +69,9 @@ public class LocationRequestsFragment extends Fragment {
 	public void onResume() {
 		super.onResume();
 
+		getActivity().setTitle("Location Requests");
+		getActivity().getActionBar().setIcon(R.drawable.ic_location_request);
+		
 		// fetch all location request
 		fetchLoationRequest();
 	}

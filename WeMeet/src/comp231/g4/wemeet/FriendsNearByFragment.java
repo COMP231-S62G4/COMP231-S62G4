@@ -222,4 +222,12 @@ public class FriendsNearByFragment extends Fragment implements
 			googleMap.setOnMyLocationChangeListener(null);
 		}
 	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+
+		getActivity().setTitle("Friends Nearby");
+		getActivity().getActionBar().setIcon(R.drawable.ic_friends_nearby);
+	}
 }

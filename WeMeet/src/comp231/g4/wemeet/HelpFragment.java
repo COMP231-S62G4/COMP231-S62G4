@@ -6,19 +6,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class AboutFragment extends Fragment {
+public class HelpFragment extends Fragment {
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.activity_about, null);
+		return inflater.inflate(R.layout.activity_help, null);
 	}
 	
 	@Override
 	public void onResume() {
 		super.onResume();
-		getActivity().setTitle("About");
-		
-		getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
-		getActivity().getActionBar().setIcon(R.drawable.ic_launcher);
+		getActivity().setTitle("Help");
+		getActivity().getActionBar().setIcon(android.R.drawable.ic_menu_help);
 	}
 }

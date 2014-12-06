@@ -24,7 +24,7 @@ import android.widget.Toast;
 public class SettingsFragment extends Fragment implements
 		OnCheckedChangeListener, OnClickListener {
 	private Switch switchNotificationSound, switchNotification;
-	private Button btnAbout, btnChangePassword;
+	private Button btnAbout, btnChangePassword, btnHelp;
 	private Dialog dialogChangePassword;
 
 	// buttons from change password dialog
@@ -76,6 +76,9 @@ public class SettingsFragment extends Fragment implements
 			switchNotification.setOnCheckedChangeListener(this);
 			switchNotificationSound.setOnCheckedChangeListener(this);
 
+			btnHelp = (Button) getActivity().findViewById(R.id.btnHelp);
+			btnHelp.setOnClickListener(this);
+			
 			btnAbout = (Button) getActivity().findViewById(R.id.btnAbout);
 			btnAbout.setOnClickListener(this);
 
@@ -111,12 +114,19 @@ public class SettingsFragment extends Fragment implements
 	public void onResume() {
 		super.onResume();
 		getActivity().setTitle("Settings");
+		getActivity().getActionBar().setIcon(R.drawable.ic_sysbar_quicksettings);
 	}
 
 	@Override
 	public void onClick(View v) {
 		if (v == btnAbout) {
 			Fragment fragment = new AboutFragment();
+
+			FragmentManager manager = getFragmentManager();
+			manager.beginTransaction().replace(R.id.content_frame, fragment)
+					.addToBackStack(null).commit();
+		} else if (v == btnHelp) {
+			Fragment fragment = new HelpFragment();
 
 			FragmentManager manager = getFragmentManager();
 			manager.beginTransaction().replace(R.id.content_frame, fragment)

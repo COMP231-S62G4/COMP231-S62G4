@@ -44,6 +44,19 @@
         android:background="#CCC" />
 
     <Button
+        android:id="@+id/btnHelp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Help"
+        android:padding="10dp"
+        android:gravity="center_vertical"
+        android:background="@android:drawable/list_selector_background" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#CCC" />
+
+    <Button
         android:id="@+id/btnAbout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

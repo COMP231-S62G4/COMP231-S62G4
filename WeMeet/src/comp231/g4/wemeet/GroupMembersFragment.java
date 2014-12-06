@@ -99,6 +99,7 @@ public class GroupMembersFragment extends Fragment implements
 
 		// set activity title to group name
 		getActivity().setTitle(groupName);
+		getActivity().getActionBar().setIcon(R.drawable.ic_groups);
 	}
 
 	@Override
