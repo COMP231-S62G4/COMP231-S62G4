@@ -13,8 +13,11 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.Switch;
+import android.widget.TextView;
+import android.widget.Toast;
 
 public class SettingsFragment extends Fragment implements
 		OnCheckedChangeListener, OnClickListener {
@@ -22,9 +25,12 @@ public class SettingsFragment extends Fragment implements
 	private Button btnAbout, btnChangePassword;
 	private Dialog dialogChangePassword;
 
-	//buttons from change password dialog
+	// buttons from change password dialog
 	private Button btnChange, btnCancel;
-	
+	// edit texts from chnage password dialog
+	private EditText etCurrentPassword, etNewPassword, etConfirmPassword;
+	private TextView tvCurrentPassword;
+
 	private SharedPreferences prefs;
 
 	public static final String KEY_NOTIFICATION = "NOTIFICATION_ENABLED";
@@ -51,10 +57,10 @@ public class SettingsFragment extends Fragment implements
 
 			switchNotification = (Switch) getActivity().findViewById(
 					R.id.switchNotification);
-			
+
 			switchNotificationSound = (Switch) getActivity().findViewById(
 					R.id.switchNotificationSound);
-			
+
 			// loading default values
 			boolean enableNotification = prefs.getBoolean(KEY_NOTIFICATION,
 					true);
@@ -62,24 +68,47 @@ public class SettingsFragment extends Fragment implements
 
 			boolean enableNotificationSound = prefs.getBoolean(
 					KEY_NOTIFICATION_SOUND, true);
-			
+
 			switchNotificationSound.setChecked(enableNotificationSound);
 
 			switchNotification.setOnCheckedChangeListener(this);
 			switchNotificationSound.setOnCheckedChangeListener(this);
-			
+
 			btnAbout = (Button) getActivity().findViewById(R.id.btnAbout);
 			btnAbout.setOnClickListener(this);
-			
-			btnChangePassword = (Button) getActivity().findViewById(R.id.btnChangePassword);
+
+			btnChangePassword = (Button) getActivity().findViewById(
+					R.id.btnChangePassword);
 			btnChangePassword.setOnClickListener(this);
-			
-			//initializing change password dialog
+
+			// initializing change password dialog
 			dialogChangePassword = new Dialog(getActivity());
-			dialogChangePassword.setContentView(R.layout.dialog_change_password);
+			dialogChangePassword
+					.setContentView(R.layout.dialog_change_password);
+			dialogChangePassword.setTitle("Change Password");
+
+			tvCurrentPassword = (TextView) dialogChangePassword
+					.findViewById(R.id.tvOldPassword);
+			etCurrentPassword = (EditText) dialogChangePassword
+					.findViewById(R.id.etOldPassword);
+			etNewPassword = (EditText) dialogChangePassword
+					.findViewById(R.id.etNewPassword);
+			etConfirmPassword = (EditText) dialogChangePassword
+					.findViewById(R.id.etConfirmPassword);
+
+			btnCancel = (Button) dialogChangePassword
+					.findViewById(R.id.btnCancel);
+			btnCancel.setOnClickListener(this);
+
+			btnChange = (Button) dialogChangePassword
+					.findViewById(R.id.btnChangePassword);
+			btnChange.setOnClickListener(this);
 			
-			btnCancel = (Button) dialogChangePassword.findViewById(R.id.btnCancel);
-			btnChange = (Button) dialogChangePassword.findViewById(R.id.btnChangePassword);
+			//initializing dialog
+			if(!prefs.contains(AuthenticationActivity.KEY_PASSWORD)){
+				etCurrentPassword.setVisibility(View.INVISIBLE);
+				tvCurrentPassword.setVisibility(View.INVISIBLE);
+			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -119,9 +148,49 @@ public class SettingsFragment extends Fragment implements
 			FragmentManager manager = getFragmentManager();
 			manager.beginTransaction().replace(R.id.content_frame, fragment)
 					.addToBackStack(null).commit();
-		}
-		else if(v == btnChangePassword){
+		} else if (v == btnChangePassword) {
 			dialogChangePassword.show();
+		} else if (v == btnCancel) {
+			dialogChangePassword.dismiss();
+		} else if (v == btnChange) {
+			if (validateEditTexts()) {
+				String currentPassword = etCurrentPassword.getText().toString().trim();
+				String newPassword = etNewPassword.getText().toString().trim();
+				
+				String userPassword = prefs.getString(AuthenticationActivity.KEY_PASSWORD, "");
+				if(userPassword.equals(currentPassword)){
+					Editor editor = prefs.edit();
+					editor.putString(AuthenticationActivity.KEY_PASSWORD, newPassword);
+					editor.commit();
+					
+					Toast.makeText(getActivity(), "Password changed successfully!", Toast.LENGTH_SHORT).show();
+					dialogChangePassword.dismiss();
+				}else{
+					etCurrentPassword.setError("Invalid Password!");
+				}
+			}
 		}
+	}
+
+	private boolean validateEditTexts() {
+		String current = etCurrentPassword.getText().toString().trim();
+		String newPassword = etNewPassword.getText().toString().trim();
+		String confirmPassword = etConfirmPassword.getText().toString()
+				.trim();
+		
+		if(current.length() == 0){
+			etCurrentPassword.setError("Invalid current password!");
+			return false;
+		}
+		if(newPassword.length() == 0){
+			etNewPassword.setError("Invalid password!");
+			return false;
+		}
+		if(!newPassword.equals(confirmPassword)){
+			etConfirmPassword.setError("Password do not match!");
+			return false;
+		}
+		
+		return true;
 	}
 }

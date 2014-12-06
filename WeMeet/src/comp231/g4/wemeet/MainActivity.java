@@ -82,7 +82,13 @@ public class MainActivity extends Activity {
 						public void run() {
 
 							if (status == 0) {
-								showErrorDialog();
+								runOnUiThread(new Runnable() {
+
+									@Override
+									public void run() {
+										showErrorDialog();
+									}
+								});
 
 							} else if (status == -1) {
 								setContentView(R.layout.activity_main);

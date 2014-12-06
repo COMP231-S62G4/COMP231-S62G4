@@ -6,7 +6,9 @@ import java.util.List;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.ParseException;
+import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -21,8 +23,9 @@ import android.util.Log;
 import com.google.android.gms.maps.model.LatLng;
 
 public class AndroidClient {
-	
-	//private static final String baseURL = "http://10.24.68.148/WeMeetService/WeMeetService.svc/json/";
+
+	// private static final String baseURL =
+	// "http://10.24.68.148/WeMeetService/WeMeetService.svc/json/";
 	private static final String baseURL = "http://192.168.0.104/WeMeetService/WeMeetService.svc/json/";
 
 	public boolean RegisterPhoneNumber(String phoneNumber) throws Exception {
@@ -119,9 +122,13 @@ public class AndroidClient {
 			HttpGet request = new HttpGet(url);
 
 			HttpResponse response = httpClient.execute(request);
-			HttpEntity entity = response.getEntity();
+			if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+				HttpEntity entity = response.getEntity();
 
-			return EntityUtils.toString(entity);
+				return EntityUtils.toString(entity);
+			} else {
+				throw new Exception("Connection error");
+			}
 
 		} catch (ClientProtocolException e) {
 			Log.e("WeMeet_Exception", e.getMessage());
@@ -139,7 +146,8 @@ public class AndroidClient {
 	}
 
 	public String getSharedLocationList(String phoneNumber) throws Exception {
-		return String.valueOf(GetData(baseURL+"GetSharedLocationList/"+phoneNumber));
+		return String.valueOf(GetData(baseURL + "GetSharedLocationList/"
+				+ phoneNumber));
 	}
 
 	List<String> GetGroups(String phoneNumber) {
