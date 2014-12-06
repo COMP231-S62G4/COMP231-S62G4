@@ -24,7 +24,20 @@
         android:padding="10dp"
         android:text="Notification Sound"
         android:textAppearance="?android:attr/textAppearanceMedium" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#CCC" />
 
+    <Button
+        android:id="@+id/btnChangePassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Change Password"
+        android:padding="10dp"
+        android:gravity="center_vertical"
+        android:background="@android:drawable/list_selector_background" />
+    
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"

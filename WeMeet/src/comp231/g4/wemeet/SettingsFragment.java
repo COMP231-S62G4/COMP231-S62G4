@@ -1,5 +1,6 @@
 package comp231.g4.wemeet;
 
+import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.SharedPreferences;
@@ -18,8 +19,12 @@ import android.widget.Switch;
 public class SettingsFragment extends Fragment implements
 		OnCheckedChangeListener, OnClickListener {
 	private Switch switchNotificationSound, switchNotification;
-	private Button btnAbout;
+	private Button btnAbout, btnChangePassword;
+	private Dialog dialogChangePassword;
 
+	//buttons from change password dialog
+	private Button btnChange, btnCancel;
+	
 	private SharedPreferences prefs;
 
 	public static final String KEY_NOTIFICATION = "NOTIFICATION_ENABLED";
@@ -65,6 +70,16 @@ public class SettingsFragment extends Fragment implements
 			
 			btnAbout = (Button) getActivity().findViewById(R.id.btnAbout);
 			btnAbout.setOnClickListener(this);
+			
+			btnChangePassword = (Button) getActivity().findViewById(R.id.btnChangePassword);
+			btnChangePassword.setOnClickListener(this);
+			
+			//initializing change password dialog
+			dialogChangePassword = new Dialog(getActivity());
+			dialogChangePassword.setContentView(R.layout.dialog_change_password);
+			
+			btnCancel = (Button) dialogChangePassword.findViewById(R.id.btnCancel);
+			btnChange = (Button) dialogChangePassword.findViewById(R.id.btnChangePassword);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -104,6 +119,9 @@ public class SettingsFragment extends Fragment implements
 			FragmentManager manager = getFragmentManager();
 			manager.beginTransaction().replace(R.id.content_frame, fragment)
 					.addToBackStack(null).commit();
+		}
+		else if(v == btnChangePassword){
+			dialogChangePassword.show();
 		}
 	}
 }
