@@ -47,9 +47,9 @@ public class SharedLocationDataSource {
 		return id > 0;
 	}
 
-	public boolean deleteContact(int contactId) {
-		return database.delete(TABLE_SHARED_LOCATION, COL_ID + " = "
-				+ contactId, null) > 0;
+	public boolean deleteContact(String phoneNumber) {
+		return database.delete(TABLE_SHARED_LOCATION, COL_PHONENUMBER + " = "
+				+ phoneNumber, null) > 0;
 	}
 
 	public Contact exists(Contact contact) {
@@ -59,7 +59,7 @@ public class SharedLocationDataSource {
 			Cursor c = database.rawQuery("select * from "
 					+ TABLE_SHARED_LOCATION + " where " + COL_NAME + "='"
 					+ contact.name + "' and " + COL_PHONENUMBER + "='"
-					+ contact.numbers.get(i).number + "'", null);
+					+ ValidationHelper.SanitizePhoneNumber(contact.numbers.get(i).number) + "'", null);
 			if (c.moveToFirst()) {
 				ret_val = new Contact(c.getString(0), c.getString(1));
 				ret_val.numbers.add(new ContactPhone(c.getString(2), ""));

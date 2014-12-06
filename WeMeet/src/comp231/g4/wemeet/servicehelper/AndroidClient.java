@@ -149,14 +149,9 @@ public class AndroidClient {
 		return String.valueOf(GetData(baseURL + "GetSharedLocationList/"
 				+ phoneNumber));
 	}
-
-	List<String> GetGroups(String phoneNumber) {
-		ArrayList lst = new ArrayList();
-		return lst;
-	}
-
-	List<String> GetGroupMembers(String phoneNumber, String groupName) {
-		ArrayList lst = new ArrayList();
-		return lst;
+	
+	public boolean RemoveFromSharedLocationList(String fromPhoneNumber, String phoneNumber) throws Exception {
+		return Boolean.parseBoolean(String.valueOf(GetData(baseURL + "RemoveFromSharedLocationList/"
+				+ fromPhoneNumber+"/"+phoneNumber)));
 	}
 }

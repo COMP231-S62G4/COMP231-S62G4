@@ -44,6 +44,8 @@ public class AuthenticationActivity extends Activity implements OnClickListener 
 			String password = etPassword.getText().toString();
 			String encodedPassword = ValidationHelper.EncodeString(password);
 			
+			etPassword.setText("");
+			
 			SharedPreferences pManager = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 			String userPassword = pManager.getString(KEY_PASSWORD, "");
 			if(encodedPassword.equals(userPassword)){
@@ -56,7 +58,6 @@ public class AuthenticationActivity extends Activity implements OnClickListener 
 				
 				Toast.makeText(AuthenticationActivity.this, "Entering into secure zone!", Toast.LENGTH_SHORT).show();
 			}else{
-				etPassword.setText("");
 				etPassword.setError("Invalid password!");
 				etPassword.setBackgroundColor(Color.parseColor("#C20000"));
 				etPassword.setTextColor(Color.WHITE);

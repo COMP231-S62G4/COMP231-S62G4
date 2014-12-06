@@ -1,5 +1,7 @@
 package comp231.g4.wemeet;
 
+import comp231.g4.wemeet.helpers.ValidationHelper;
+
 import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -81,35 +83,6 @@ public class SettingsFragment extends Fragment implements
 					R.id.btnChangePassword);
 			btnChangePassword.setOnClickListener(this);
 
-			// initializing change password dialog
-			dialogChangePassword = new Dialog(getActivity());
-			dialogChangePassword
-					.setContentView(R.layout.dialog_change_password);
-			dialogChangePassword.setTitle("Change Password");
-
-			tvCurrentPassword = (TextView) dialogChangePassword
-					.findViewById(R.id.tvOldPassword);
-			etCurrentPassword = (EditText) dialogChangePassword
-					.findViewById(R.id.etOldPassword);
-			etNewPassword = (EditText) dialogChangePassword
-					.findViewById(R.id.etNewPassword);
-			etConfirmPassword = (EditText) dialogChangePassword
-					.findViewById(R.id.etConfirmPassword);
-
-			btnCancel = (Button) dialogChangePassword
-					.findViewById(R.id.btnCancel);
-			btnCancel.setOnClickListener(this);
-
-			btnChange = (Button) dialogChangePassword
-					.findViewById(R.id.btnChangePassword);
-			btnChange.setOnClickListener(this);
-			
-			//initializing dialog
-			if(!prefs.contains(AuthenticationActivity.KEY_PASSWORD)){
-				etCurrentPassword.setVisibility(View.INVISIBLE);
-				tvCurrentPassword.setVisibility(View.INVISIBLE);
-			}
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -149,48 +122,91 @@ public class SettingsFragment extends Fragment implements
 			manager.beginTransaction().replace(R.id.content_frame, fragment)
 					.addToBackStack(null).commit();
 		} else if (v == btnChangePassword) {
+			// initialize change password dialog
+			InitializeChangePasswordDialog();
+
 			dialogChangePassword.show();
 		} else if (v == btnCancel) {
 			dialogChangePassword.dismiss();
 		} else if (v == btnChange) {
 			if (validateEditTexts()) {
-				String currentPassword = etCurrentPassword.getText().toString().trim();
+
+				String currentPassword = "";
+				if (prefs.contains(AuthenticationActivity.KEY_PASSWORD)) {
+					currentPassword = ValidationHelper.EncodeString(etCurrentPassword.getText().toString()
+							.trim());
+				}
+
 				String newPassword = etNewPassword.getText().toString().trim();
-				
-				String userPassword = prefs.getString(AuthenticationActivity.KEY_PASSWORD, "");
-				if(userPassword.equals(currentPassword)){
+
+				String userPassword = prefs.getString(
+						AuthenticationActivity.KEY_PASSWORD, "");
+				if (userPassword.equals(currentPassword)) {
 					Editor editor = prefs.edit();
-					editor.putString(AuthenticationActivity.KEY_PASSWORD, newPassword);
+					editor.putString(AuthenticationActivity.KEY_PASSWORD,
+							ValidationHelper.EncodeString(newPassword));
 					editor.commit();
-					
-					Toast.makeText(getActivity(), "Password changed successfully!", Toast.LENGTH_SHORT).show();
+
+					Toast.makeText(getActivity(),
+							"Password changed successfully!",
+							Toast.LENGTH_SHORT).show();
 					dialogChangePassword.dismiss();
-				}else{
+				} else {
 					etCurrentPassword.setError("Invalid Password!");
 				}
 			}
 		}
 	}
 
+	private void InitializeChangePasswordDialog() {
+		// initializing change password dialog
+		dialogChangePassword = new Dialog(getActivity());
+		dialogChangePassword.setContentView(R.layout.dialog_change_password);
+		dialogChangePassword.setTitle("Change Password");
+
+		tvCurrentPassword = (TextView) dialogChangePassword
+				.findViewById(R.id.tvOldPassword);
+		etCurrentPassword = (EditText) dialogChangePassword
+				.findViewById(R.id.etOldPassword);
+		etNewPassword = (EditText) dialogChangePassword
+				.findViewById(R.id.etNewPassword);
+		etConfirmPassword = (EditText) dialogChangePassword
+				.findViewById(R.id.etConfirmPassword);
+
+		btnCancel = (Button) dialogChangePassword.findViewById(R.id.btnCancel);
+		btnCancel.setOnClickListener(this);
+
+		btnChange = (Button) dialogChangePassword
+				.findViewById(R.id.btnChangePassword);
+		btnChange.setOnClickListener(this);
+
+		// initializing dialog
+		if (!prefs.contains(AuthenticationActivity.KEY_PASSWORD)) {
+			etCurrentPassword.setVisibility(View.GONE);
+			tvCurrentPassword.setVisibility(View.GONE);
+		}
+
+	}
+
 	private boolean validateEditTexts() {
 		String current = etCurrentPassword.getText().toString().trim();
 		String newPassword = etNewPassword.getText().toString().trim();
-		String confirmPassword = etConfirmPassword.getText().toString()
-				.trim();
-		
-		if(current.length() == 0){
+		String confirmPassword = etConfirmPassword.getText().toString().trim();
+
+		if (prefs.contains(AuthenticationActivity.KEY_PASSWORD)
+				&& current.length() == 0) {
 			etCurrentPassword.setError("Invalid current password!");
 			return false;
 		}
-		if(newPassword.length() == 0){
+		if (newPassword.length() == 0) {
 			etNewPassword.setError("Invalid password!");
 			return false;
 		}
-		if(!newPassword.equals(confirmPassword)){
+		if (!newPassword.equals(confirmPassword)) {
 			etConfirmPassword.setError("Password do not match!");
 			return false;
 		}
-		
+
 		return true;
 	}
 }

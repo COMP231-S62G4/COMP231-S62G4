@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import comp231.g4.wemeet.helpers.ContactFetcher;
 import comp231.g4.wemeet.helpers.InvitationDataSource;
 import comp231.g4.wemeet.helpers.RegisteredContactsDataSource;
+import comp231.g4.wemeet.helpers.SharedLocationDataSource;
 import comp231.g4.wemeet.helpers.ValidationHelper;
 import comp231.g4.wemeet.model.Contact;
 import comp231.g4.wemeet.servicehelper.AndroidClient;
@@ -196,8 +197,21 @@ public class ContactsFragment extends Fragment implements OnClickListener {
 		currentRegisteredContact = dsRegisteredContacts.exists(currentContact);
 		if (currentRegisteredContact == null) {
 			menu.removeItem(R.id.menu_item_share_location);
+			menu.removeItem(R.id.menu_item_unshare_location);
 		} else {
 			menu.removeItem(R.id.menu_item_invite);
+			
+			SharedLocationDataSource dsSharedLocations = new SharedLocationDataSource(getActivity());
+			dsSharedLocations.open();
+			
+			Contact contact = dsSharedLocations.exists(currentRegisteredContact);
+			dsSharedLocations.close();
+			
+			if(contact == null){
+				menu.removeItem(R.id.menu_item_unshare_location);
+			}else{
+				menu.removeItem(R.id.menu_item_share_location);
+			}
 		}
 		// closing database connection
 		dsRegisteredContacts.close();
@@ -226,6 +240,12 @@ public class ContactsFragment extends Fragment implements OnClickListener {
 			if (currentRegisteredContact != null) {
 				shareLocation(currentRegisteredContact);
 			}
+			break;
+		case R.id.menu_item_unshare_location:
+			if (currentRegisteredContact != null) {
+				unshareLocation(currentRegisteredContact);
+			}
+			break;
 		default:
 			break;
 		}
@@ -264,6 +284,63 @@ public class ContactsFragment extends Fragment implements OnClickListener {
 						msg = "Request sent.";
 					} else {
 						msg = "Unable to send request!";
+					}
+
+					getActivity().runOnUiThread(new Runnable() {
+						public void run() {
+							Toast.makeText(getActivity(), msg,
+									Toast.LENGTH_SHORT).show();
+						}
+					});
+				}
+
+			}
+		});
+
+		t.start();// starting thread
+
+	}
+	
+	private void unshareLocation(final Contact contact) {
+
+		Thread t = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				final String toPhoneNumber = ValidationHelper
+						.SanitizePhoneNumber(contact.numbers
+								.get(0).number);
+				boolean result = false;
+				try {
+					AndroidClient client = new AndroidClient();
+
+					SharedPreferences prefs = PreferenceManager
+							.getDefaultSharedPreferences(getActivity()
+									.getApplicationContext());
+					String fromPhoneNumber = prefs.getString(
+							MainActivity.KEY_PHONE_NUMBER, "");
+					
+					result = client
+							.RemoveFromSharedLocationList(
+									fromPhoneNumber,
+									toPhoneNumber);
+				} catch (Exception e) {
+					Log.e("WeMeet_Exception", e.getMessage());
+					result = false;
+				} finally {
+					final String msg;
+
+					if (result) {
+						SharedLocationDataSource dsSharedLocation = new SharedLocationDataSource(getActivity());
+						dsSharedLocation.open();
+						
+						dsSharedLocation.deleteContact(toPhoneNumber);
+						
+						dsSharedLocation.close();
+						
+						msg = "Location unshared.";
+					} else {
+						msg = "Unable to process request!";
 					}
 
 					getActivity().runOnUiThread(new Runnable() {

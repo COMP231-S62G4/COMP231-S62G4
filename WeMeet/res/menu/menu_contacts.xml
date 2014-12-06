@@ -3,5 +3,6 @@
     
 	<item android:title="@string/menu_item_view_contact" android:id="@+id/menu_item_view_contact"/>
 	<item android:title="@string/menu_item_share_location" android:id="@+id/menu_item_share_location"/>
+	<item android:title="@string/menu_item_unshare_location" android:id="@+id/menu_item_unshare_location"/>
 	<item android:title="@string/menu_item_invite" android:id="@+id/menu_item_invite"/>
 </menu>
