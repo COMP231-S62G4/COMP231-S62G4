@@ -24,6 +24,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		db.execSQL(GroupsDataSource.CREATE_GROUP_MEMBERS);
 		db.execSQL(SharedLocationDataSource.CREATE_SHARED_LOCATION);
 		db.execSQL(NearbyContactsDataSource.CREATE_NEARBY_CONTACTS);
+		db.execSQL(PasswordRecoveryDataSource.CREATE_SECURITY_SETUP);
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package comp231.g4.wemeet;
 
+import comp231.g4.wemeet.helpers.PasswordRecoveryDataSource;
 import comp231.g4.wemeet.helpers.ValidationHelper;
 
 import android.app.Dialog;
@@ -32,11 +33,16 @@ public class SettingsFragment extends Fragment implements
 	// edit texts from chnage password dialog
 	private EditText etCurrentPassword, etNewPassword, etConfirmPassword;
 	private TextView tvCurrentPassword;
+	// edit texts from security setup
+	private TextView tvQuestion1, tvQuestion2, tvQuestion3;
+	private EditText etAnswer1, etAnswer2, etAnswer3;
+	private Button btnSetup;
 
 	private SharedPreferences prefs;
 
 	public static final String KEY_NOTIFICATION = "NOTIFICATION_ENABLED";
 	public static final String KEY_NOTIFICATION_SOUND = "NOTIFICATION_SOUND_ENABLED";
+	public static final String KEY_SECURITY_SETUP = "SECURITY_SETUP";
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -78,7 +84,7 @@ public class SettingsFragment extends Fragment implements
 
 			btnHelp = (Button) getActivity().findViewById(R.id.btnHelp);
 			btnHelp.setOnClickListener(this);
-			
+
 			btnAbout = (Button) getActivity().findViewById(R.id.btnAbout);
 			btnAbout.setOnClickListener(this);
 
@@ -114,7 +120,8 @@ public class SettingsFragment extends Fragment implements
 	public void onResume() {
 		super.onResume();
 		getActivity().setTitle("Settings");
-		getActivity().getActionBar().setIcon(R.drawable.ic_sysbar_quicksettings);
+		getActivity().getActionBar()
+				.setIcon(R.drawable.ic_sysbar_quicksettings);
 	}
 
 	@Override
@@ -138,13 +145,42 @@ public class SettingsFragment extends Fragment implements
 			dialogChangePassword.show();
 		} else if (v == btnCancel) {
 			dialogChangePassword.dismiss();
+		} else if (v == btnSetup) {
+
+			if (validateAnswers()) {
+
+				String answer1 = etAnswer1.getText().toString().trim();
+				String answer2 = etAnswer2.getText().toString().trim();
+				String answer3 = etAnswer3.getText().toString().trim();
+
+				String question1 = tvQuestion1.getText().toString().trim();
+				String question2 = tvQuestion2.getText().toString().trim();
+				String question3 = tvQuestion3.getText().toString().trim();
+
+				PasswordRecoveryDataSource dsPasswordRecovery = new PasswordRecoveryDataSource(getActivity());
+				dsPasswordRecovery.open();
+				
+				dsPasswordRecovery.add(question1, answer1);
+				dsPasswordRecovery.add(question2, answer2);
+				dsPasswordRecovery.add(question3, answer3);
+				
+				dsPasswordRecovery.close();
+				
+				Editor editor = prefs.edit();
+				editor.putBoolean(KEY_SECURITY_SETUP, true);
+				editor.commit();
+				dialogChangePassword.dismiss();
+
+			}
 		} else if (v == btnChange) {
+
 			if (validateEditTexts()) {
 
 				String currentPassword = "";
 				if (prefs.contains(AuthenticationActivity.KEY_PASSWORD)) {
-					currentPassword = ValidationHelper.EncodeString(etCurrentPassword.getText().toString()
-							.trim());
+					currentPassword = ValidationHelper
+							.EncodeString(etCurrentPassword.getText()
+									.toString().trim());
 				}
 
 				String newPassword = etNewPassword.getText().toString().trim();
@@ -169,31 +205,63 @@ public class SettingsFragment extends Fragment implements
 	}
 
 	private void InitializeChangePasswordDialog() {
-		// initializing change password dialog
-		dialogChangePassword = new Dialog(getActivity());
-		dialogChangePassword.setContentView(R.layout.dialog_change_password);
-		dialogChangePassword.setTitle("Change Password");
+		boolean securitySetup = prefs.getBoolean(KEY_SECURITY_SETUP, false);
 
-		tvCurrentPassword = (TextView) dialogChangePassword
-				.findViewById(R.id.tvOldPassword);
-		etCurrentPassword = (EditText) dialogChangePassword
-				.findViewById(R.id.etOldPassword);
-		etNewPassword = (EditText) dialogChangePassword
-				.findViewById(R.id.etNewPassword);
-		etConfirmPassword = (EditText) dialogChangePassword
-				.findViewById(R.id.etConfirmPassword);
+		if (securitySetup) {
+			// initializing change password dialog
+			dialogChangePassword = new Dialog(getActivity());
+			dialogChangePassword
+					.setContentView(R.layout.dialog_change_password);
+			dialogChangePassword.setTitle("Change Password");
 
-		btnCancel = (Button) dialogChangePassword.findViewById(R.id.btnCancel);
-		btnCancel.setOnClickListener(this);
+			tvCurrentPassword = (TextView) dialogChangePassword
+					.findViewById(R.id.tvOldPassword);
+			etCurrentPassword = (EditText) dialogChangePassword
+					.findViewById(R.id.etOldPassword);
+			etNewPassword = (EditText) dialogChangePassword
+					.findViewById(R.id.etNewPassword);
+			etConfirmPassword = (EditText) dialogChangePassword
+					.findViewById(R.id.etConfirmPassword);
 
-		btnChange = (Button) dialogChangePassword
-				.findViewById(R.id.btnChangePassword);
-		btnChange.setOnClickListener(this);
+			btnCancel = (Button) dialogChangePassword
+					.findViewById(R.id.btnCancel);
+			btnCancel.setOnClickListener(this);
 
-		// initializing dialog
-		if (!prefs.contains(AuthenticationActivity.KEY_PASSWORD)) {
-			etCurrentPassword.setVisibility(View.GONE);
-			tvCurrentPassword.setVisibility(View.GONE);
+			btnChange = (Button) dialogChangePassword
+					.findViewById(R.id.btnChangePassword);
+			btnChange.setOnClickListener(this);
+
+			// initializing dialog
+			if (!prefs.contains(AuthenticationActivity.KEY_PASSWORD)) {
+				etCurrentPassword.setVisibility(View.GONE);
+				tvCurrentPassword.setVisibility(View.GONE);
+			}
+		} else {
+			dialogChangePassword = new Dialog(getActivity());
+			dialogChangePassword.setContentView(R.layout.dialog_setup_password);
+			dialogChangePassword.setTitle("Security Setup");
+
+			tvQuestion1 = (TextView) dialogChangePassword
+					.findViewById(R.id.tvQuestion1);
+			tvQuestion2 = (TextView) dialogChangePassword
+					.findViewById(R.id.tvQuestion2);
+			tvQuestion3 = (TextView) dialogChangePassword
+					.findViewById(R.id.tvQuestion3);
+
+			etAnswer1 = (EditText) dialogChangePassword
+					.findViewById(R.id.etAnswer1);
+			etAnswer2 = (EditText) dialogChangePassword
+					.findViewById(R.id.etAnswer2);
+			etAnswer3 = (EditText) dialogChangePassword
+					.findViewById(R.id.etAnswer3);
+
+			btnCancel = (Button) dialogChangePassword
+					.findViewById(R.id.btnCancel);
+			btnCancel.setOnClickListener(this);
+
+			btnSetup = (Button) dialogChangePassword
+					.findViewById(R.id.btnSetup);
+			btnSetup.setOnClickListener(this);
 		}
 
 	}
@@ -214,6 +282,27 @@ public class SettingsFragment extends Fragment implements
 		}
 		if (!newPassword.equals(confirmPassword)) {
 			etConfirmPassword.setError("Password do not match!");
+			return false;
+		}
+
+		return true;
+	}
+
+	private boolean validateAnswers() {
+		String answer1 = etAnswer1.getText().toString().trim();
+		String answer2 = etAnswer2.getText().toString().trim();
+		String answer3 = etAnswer3.getText().toString().trim();
+
+		if (answer1.length() == 0) {
+			etAnswer1.setError("Invalid answer!");
+			return false;
+		}
+		if (answer2.length() == 0) {
+			etAnswer2.setError("Invalid answer!");
+			return false;
+		}
+		if (answer3.length() == 0) {
+			etAnswer3.setError("Invalid answer!");
 			return false;
 		}
 
