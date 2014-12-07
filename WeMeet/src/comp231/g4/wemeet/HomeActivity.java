@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import comp231.g4.wemeet.model.NavDrawerItem;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -114,6 +113,7 @@ public class HomeActivity extends Activity {
 
 			public void onDrawerOpened(View drawerView) {
 				getActionBar().setTitle(mDrawerTitle);
+				
 				// calling onPrepareOptionsMenu() to hide action bar icons
 				invalidateOptionsMenu();
 			}
@@ -228,11 +228,12 @@ public class HomeActivity extends Activity {
 
 		return super.onOptionsItemSelected(item);
 	}
-	
+
 	@Override
 	protected void onDestroy() {
-		try{
+		try {
 			super.onDestroy();
-		}catch (Exception e) {	}
+		} catch (Exception e) {
+		}
 	}
 }
