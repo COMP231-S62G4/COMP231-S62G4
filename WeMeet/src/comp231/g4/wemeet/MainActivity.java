@@ -232,7 +232,8 @@ public class MainActivity extends Activity {
 	}
 
 	private boolean IsPasswordEnabled() {
-		return true;
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+		return prefs.contains(AuthenticationActivity.KEY_PASSWORD);
 	}
 	
 	private void showErrorDialog() {
