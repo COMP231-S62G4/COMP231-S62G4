@@ -45,7 +45,7 @@ public class PasswordRecoveryDataSource {
 		return id > 0;
 	}
 
-	public HashMap<String, String> getAll(String name) {
+	public HashMap<String, String> getAll() {
 		HashMap<String, String> qa = new HashMap<String, String>();
 		
 		Cursor c = database.rawQuery("select * from " + TABLE_SECURITY_SETUP

@@ -1,5 +1,8 @@
 package comp231.g4.wemeet;
 
+import java.util.HashMap;
+
+import comp231.g4.wemeet.helpers.PasswordRecoveryDataSource;
 import comp231.g4.wemeet.helpers.ValidationHelper;
 
 import android.app.Activity;
@@ -68,5 +71,18 @@ public class AuthenticationActivity extends Activity implements OnClickListener 
 		default:
 			break;
 		}
+	}
+	
+	private HashMap<String, String> getSecurityQA(){
+		HashMap<String, String> qa = null;
+		
+		PasswordRecoveryDataSource dsPasswordRecovery = new PasswordRecoveryDataSource(this);
+		dsPasswordRecovery.open();
+		
+		qa = dsPasswordRecovery.getAll();
+		
+		dsPasswordRecovery.close();
+		
+		return qa;
 	}
 }
