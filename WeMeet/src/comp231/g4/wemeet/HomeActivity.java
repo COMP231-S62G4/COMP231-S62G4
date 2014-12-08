@@ -233,6 +233,8 @@ public class HomeActivity extends Activity {
 	protected void onDestroy() {
 		try {
 			super.onDestroy();
+			
+			getFragmentManager().popBackStackImmediate();
 		} catch (Exception e) {
 		}
 	}
