@@ -117,6 +117,8 @@ public class AuthenticationActivity extends Activity implements OnClickListener 
 			break;
 		case R.id.btnCancel:
 			if (dialogResetPsssword != null) {
+				resetDialog();
+				
 				dialogResetPsssword.dismiss();
 			}
 			break;
@@ -132,11 +134,26 @@ public class AuthenticationActivity extends Activity implements OnClickListener 
 					String question2 = tvQuestion2.getText().toString().trim();
 					String question3 = tvQuestion3.getText().toString().trim();
 
-					if (questionAnswers.get(question1).equals(answer1)
-							&& questionAnswers.get(question2).equals(answer2)
-							&& questionAnswers.get(question3).equals(answer3)) {
-
-						dialogResetPsssword.dismiss();
+					if (questionAnswers.get(question1).equals(answer1)) {
+						if (questionAnswers.get(question2).equals(answer2)) {
+							if (questionAnswers.get(question3).equals(answer3)) {
+								//code to reset password
+								//basically remove password key from the preferences
+								Editor editor = prefs.edit();
+								editor.remove(KEY_PASSWORD);
+								editor.commit();
+								
+								resetDialog();
+								
+								dialogResetPsssword.dismiss();
+							} else {
+								etAnswer3.setError("Invalid answer!");
+							}
+						} else {
+							etAnswer2.setError("Invalid answer!");
+						}
+					} else {
+						etAnswer1.setError("Invalid answer!");
 					}
 
 				}
@@ -145,6 +162,13 @@ public class AuthenticationActivity extends Activity implements OnClickListener 
 		default:
 			break;
 		}
+	}
+
+	private void resetDialog() {
+		//resetting text boxes
+		etAnswer1.setText("");
+		etAnswer2.setText("");
+		etAnswer3.setText("");
 	}
 
 	private void loadSecurityQA() {
