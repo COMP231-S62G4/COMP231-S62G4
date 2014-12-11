@@ -23,7 +23,6 @@ public class DbHelper extends SQLiteOpenHelper {
 		db.execSQL(GroupsDataSource.CREATE_GROUPS);
 		db.execSQL(GroupsDataSource.CREATE_GROUP_MEMBERS);
 		db.execSQL(SharedLocationDataSource.CREATE_SHARED_LOCATION);
-		db.execSQL(NearbyContactsDataSource.CREATE_NEARBY_CONTACTS);
 		db.execSQL(PasswordRecoveryDataSource.CREATE_SECURITY_SETUP);
 	}
 
@@ -47,7 +46,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		SharedLocationDataSource dsSharedLocations = new SharedLocationDataSource(_context);
 		dsSharedLocations.deleteAll();
 		
-		NearbyContactsDataSource dsNearby = new NearbyContactsDataSource(_context);
-		dsNearby.deleteAll();
+		PasswordRecoveryDataSource dsPasswordRecovery = new PasswordRecoveryDataSource(_context);
+		dsPasswordRecovery.deleteAll();
 	}
 }

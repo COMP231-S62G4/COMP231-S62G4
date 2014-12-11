@@ -43,6 +43,8 @@ public class HomeActivity extends Activity {
 	private DeleteAccountFragment deleteAccountFragment;
 	private SettingsFragment settingsFragment;
 
+	private android.app.Fragment currentFragment = null;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -113,7 +115,7 @@ public class HomeActivity extends Activity {
 
 			public void onDrawerOpened(View drawerView) {
 				getActionBar().setTitle(mDrawerTitle);
-				
+
 				// calling onPrepareOptionsMenu() to hide action bar icons
 				invalidateOptionsMenu();
 			}
@@ -152,35 +154,36 @@ public class HomeActivity extends Activity {
 	 * Diplaying fragment view for selected nav drawer list item
 	 * */
 	private void displayView(int position) {
+		android.app.FragmentManager fragmentManager = getFragmentManager();
+
 		// update the main content by replacing fragments
-		android.app.Fragment fragment = null;
 		switch (position) {
 		case 0:
-			fragment = friendsNearbyFragment;
+			currentFragment = friendsNearbyFragment;
 			break;
 		case 1:
-			fragment = contactsFragment;
+			currentFragment = contactsFragment;
 			break;
 		case 2:
-			fragment = locationRequestsFragment;
+			currentFragment = locationRequestsFragment;
 			break;
 		case 3:
-			fragment = groupsFragment;
+			currentFragment = groupsFragment;
 			break;
 		case 4:
-			fragment = settingsFragment;
+			currentFragment = settingsFragment;
 			break;
 		case 5:
-			fragment = deleteAccountFragment;
+			currentFragment = deleteAccountFragment;
 			break;
 		default:
 			break;
 		}
 
-		if (fragment != null) {
-			android.app.FragmentManager fragmentManager = getFragmentManager();
+		if (currentFragment != null) {
+
 			fragmentManager.beginTransaction()
-					.replace(R.id.content_frame, fragment).commit();
+					.replace(R.id.content_frame, currentFragment).commit();
 
 			// update selected item and title, then close the drawer
 			mDrawerList.setItemChecked(position, true);
@@ -230,12 +233,32 @@ public class HomeActivity extends Activity {
 	}
 
 	@Override
+	protected void onPause() {
+		try {
+			super.onPause();
+
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
+	
+	@Override
+	protected void onStop() {
+		try {
+			super.onStop();
+
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
+	
+	@Override
 	protected void onDestroy() {
 		try {
 			super.onDestroy();
-			
-			getFragmentManager().popBackStackImmediate();
+
 		} catch (Exception e) {
+			// TODO: handle exception
 		}
 	}
 }

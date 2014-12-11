@@ -426,6 +426,7 @@ containing a value of this type.
         public static final int photo=0x7f020029;
         public static final int powered_by_google_dark=0x7f02002a;
         public static final int powered_by_google_light=0x7f02002b;
+        public static final int spinner=0x7f02002c;
     }
     public static final class id {
         public static final int action_exit=0x7f07004f;

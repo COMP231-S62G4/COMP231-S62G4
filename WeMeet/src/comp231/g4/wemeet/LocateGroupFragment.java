@@ -1,6 +1,10 @@
 package comp231.g4.wemeet;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -13,16 +17,17 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import comp231.g4.wemeet.helpers.GroupsDataSource;
-import comp231.g4.wemeet.helpers.NearbyContactsDataSource;
 import comp231.g4.wemeet.helpers.ValidationHelper;
 import comp231.g4.wemeet.model.Group;
 import comp231.g4.wemeet.model.GroupMember;
 import comp231.g4.wemeet.model.NearbyContact;
+import comp231.g4.wemeet.servicehelper.AndroidClient;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.DialogInterface.OnClickListener;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -30,11 +35,15 @@ import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.provider.ContactsContract.PhoneLookup;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -45,7 +54,7 @@ public class LocateGroupFragment extends Fragment implements
 	private Group group;
 	private AlertDialog dialog;
 	private MapFragment mapFragment;
-	private static View view;
+	private MenuItem miLoading;
 
 	public LocateGroupFragment(Group group) {
 		this.group = group;
@@ -65,18 +74,35 @@ public class LocateGroupFragment extends Fragment implements
 		// initializing components
 		InitializeComponents();
 	}
-	
+
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+
+		// creating menu item
+		miLoading = menu.add("Loading");
+		miLoading.setIcon(R.drawable.spinner);
+		miLoading.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+		miLoading.setVisible(false);
+
+		super.onCreateOptionsMenu(menu, inflater);
+	}
+
 	@Override
 	public void onDestroyView() {
+
 		try {
+
 			FragmentTransaction ft = getActivity().getFragmentManager()
 					.beginTransaction();
 			ft.remove(mapFragment).commit();
-			getActivity().getFragmentManager().executePendingTransactions();
 		} catch (Exception e) {
-			e.printStackTrace();
-		}finally{
-			super.onDestroyView();
+
+		} finally {
+			try {
+				super.onDestroy();
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
 		}
 	}
 
@@ -101,6 +127,8 @@ public class LocateGroupFragment extends Fragment implements
 
 		dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Ok", this);
 
+		setHasOptionsMenu(true);
+
 		// locating group members
 		locateGroupMembers();
 	}
@@ -111,12 +139,47 @@ public class LocateGroupFragment extends Fragment implements
 			@Override
 			public void run() {
 				// loading near by contacts list
-				NearbyContactsDataSource dsNearby = new NearbyContactsDataSource(
-						getActivity());
-				dsNearby.open();
-				List<NearbyContact> nearbyContacts = dsNearby
-						.getNearbyContacts();
-				dsNearby.close();
+
+				List<NearbyContact> nearbyContacts = new ArrayList<NearbyContact>();
+
+				AndroidClient client = new AndroidClient();
+
+				SharedPreferences prefs = PreferenceManager
+						.getDefaultSharedPreferences(getActivity()
+								.getApplicationContext());
+				try {
+
+					JSONArray data = client.GetFriendsNearBy(prefs.getString(
+							MainActivity.KEY_PHONE_NUMBER, ""));
+
+					for (int i = 0; i < data.length(); i++) {
+
+						try {
+							JSONObject individualData = new JSONObject(data
+									.get(i).toString());
+
+							double distance = Double.parseDouble(individualData
+									.getString("Distance"));
+							JSONObject location = individualData
+									.getJSONObject("Location");
+							String phoneNumber = individualData
+									.getString("PhoneNumber");
+
+							LatLng iLocation = new LatLng(location
+									.getDouble("Latitude"), location
+									.getDouble("Longitude"));
+							String lastSeen = location.getString("Date");
+
+							nearbyContacts.add(new NearbyContact(phoneNumber,
+									iLocation, distance, lastSeen));
+
+						} catch (Exception e) {
+						}
+					}
+
+				} catch (Exception e) {
+
+				}
 
 				if (nearbyContacts.size() > 0) {
 					// loading list of group members
@@ -155,6 +218,9 @@ public class LocateGroupFragment extends Fragment implements
 										if (map != null) {
 											map.addMarker(marker);
 										}
+										if (miLoading != null) {
+											miLoading.setVisible(false);
+										}
 									}
 								});
 								break;
@@ -162,10 +228,28 @@ public class LocateGroupFragment extends Fragment implements
 						}
 					}
 					if (markersAdded == 0) {
-						dialog.show();// no one is nearby
+						getActivity().runOnUiThread(new Runnable() {
+
+							@Override
+							public void run() {
+								if (miLoading != null) {
+									miLoading.setVisible(false);
+								}
+								dialog.show();// no one is nearby
+							}
+						});
 					}
 				} else {
-					dialog.show();
+					getActivity().runOnUiThread(new Runnable() {
+
+						@Override
+						public void run() {
+							if (miLoading != null) {
+								miLoading.setVisible(false);
+							}
+							dialog.show();
+						}
+					});
 				}
 			}
 		});

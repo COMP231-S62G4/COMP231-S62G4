@@ -1,8 +1,12 @@
 package comp231.g4.wemeet;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -14,11 +18,12 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import comp231.g4.wemeet.helpers.NearbyContactsDataSource;
 import comp231.g4.wemeet.helpers.ValidationHelper;
 import comp231.g4.wemeet.model.NearbyContact;
+import comp231.g4.wemeet.servicehelper.AndroidClient;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -27,11 +32,15 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.PhoneLookup;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -44,7 +53,7 @@ public class FriendsNearByFragment extends Fragment implements
 	private Timer updateTimer;
 	private final static int UPDATE_DELAY = 1000 * 60;// updating at every
 
-	private boolean isFirst = true;
+	private MenuItem miLoading;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -56,14 +65,18 @@ public class FriendsNearByFragment extends Fragment implements
 	public void onDestroyView() {
 
 		try {
+
 			FragmentTransaction ft = getActivity().getFragmentManager()
 					.beginTransaction();
 			ft.remove(mapFragment).commit();
-			getActivity().getFragmentManager().executePendingTransactions();
 		} catch (Exception e) {
-			e.printStackTrace();
-		}finally{
-			super.onDestroyView();
+
+		} finally {
+			try {
+				super.onDestroy();
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
 		}
 	}
 
@@ -90,54 +103,7 @@ public class FriendsNearByFragment extends Fragment implements
 						Toast.LENGTH_SHORT).show();
 			}
 
-			updateTimer = new Timer();
-			updateTimer.schedule(new TimerTask() {
-
-				@Override
-				public void run() {
-					if (googleMap != null) {
-						new Handler(Looper.getMainLooper())
-								.post(new Runnable() {
-
-									@Override
-									public void run() {
-										googleMap.clear();// clearing map
-									}
-								});
-						try {
-							NearbyContactsDataSource dsNearby = new NearbyContactsDataSource(
-									getActivity());
-							dsNearby.open();
-							List<NearbyContact> contacts = dsNearby
-									.getNearbyContacts();
-							dsNearby.close();
-
-							for (int i = 0; i < contacts.size(); i++) {
-
-								NearbyContact currentContact = contacts.get(i);
-
-								final MarkerOptions marker = GetContactDetails(
-										currentContact.phoneNumber,
-										currentContact.distance,
-										currentContact.location);
-
-								Handler handler = new Handler(Looper
-										.getMainLooper());
-								handler.post(new Runnable() {
-
-									@Override
-									public void run() {
-										googleMap.addMarker(marker);
-									}
-								});
-
-							}
-						} catch (Exception e) {
-							Log.e("WeMeet_Exception", "");
-						}
-					}
-				}
-			}, UPDATE_DELAY / 5, UPDATE_DELAY);
+			setHasOptionsMenu(true);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -206,6 +172,18 @@ public class FriendsNearByFragment extends Fragment implements
 	}
 
 	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+
+		// creating menu item
+		miLoading = menu.add("Loading");
+		miLoading.setIcon(R.drawable.spinner);
+		miLoading.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+		miLoading.setVisible(false);
+
+		super.onCreateOptionsMenu(menu, inflater);
+	}
+
+	@Override
 	public void onInfoWindowClick(Marker arg0) {
 		Toast.makeText(getActivity(), arg0.getTitle(), Toast.LENGTH_SHORT)
 				.show();
@@ -215,19 +193,117 @@ public class FriendsNearByFragment extends Fragment implements
 	public void onMyLocationChange(Location location) {
 		LatLng coordinate = new LatLng(location.getLatitude(),
 				location.getLongitude());
-		if (isFirst) {
-			googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinate,
-					12));
-			isFirst = false;
-			googleMap.setOnMyLocationChangeListener(null);
-		}
+		googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinate, 12));
+		googleMap.setOnMyLocationChangeListener(null);
 	}
-	
+
 	@Override
 	public void onResume() {
 		super.onResume();
 
 		getActivity().setTitle("Friends Nearby");
 		getActivity().getActionBar().setIcon(R.drawable.ic_friends_nearby);
+
+		updateTimer = new Timer();
+
+		TimerTask task = new TimerTask() {
+
+			@Override
+			public void run() {
+				if (googleMap != null) {
+					new Handler(Looper.getMainLooper()).post(new Runnable() {
+
+						@Override
+						public void run() {
+							if (miLoading != null) {
+								miLoading.setVisible(true);
+							}
+							googleMap.clear();// clearing map
+
+						}
+					});
+					try {
+						List<NearbyContact> contacts = new ArrayList<NearbyContact>();
+
+						AndroidClient client = new AndroidClient();
+
+						SharedPreferences prefs = PreferenceManager
+								.getDefaultSharedPreferences(getActivity()
+										.getApplicationContext());
+
+						JSONArray data = client.GetFriendsNearBy(prefs
+								.getString(MainActivity.KEY_PHONE_NUMBER, ""));
+
+						for (int i = 0; i < data.length(); i++) {
+
+							try {
+								JSONObject individualData = new JSONObject(data
+										.get(i).toString());
+
+								double distance = Double
+										.parseDouble(individualData
+												.getString("Distance"));
+								JSONObject location = individualData
+										.getJSONObject("Location");
+								String phoneNumber = individualData
+										.getString("PhoneNumber");
+
+								LatLng iLocation = new LatLng(
+										location.getDouble("Latitude"),
+										location.getDouble("Longitude"));
+								String lastSeen = location.getString("Date");
+
+								contacts.add(new NearbyContact(phoneNumber,
+										iLocation, distance, lastSeen));
+
+							} catch (Exception e) {
+							}
+						}
+						if (contacts.size() == 0) {
+							getActivity().runOnUiThread(new Runnable() {
+
+								@Override
+								public void run() {
+									Toast.makeText(getActivity(),
+											"No one is nearby.",
+											Toast.LENGTH_LONG).show();
+									if (miLoading != null) {
+										miLoading.setVisible(false);
+									}
+								}
+							});
+
+						}
+						for (int i = 0; i < contacts.size(); i++) {
+
+							NearbyContact currentContact = contacts.get(i);
+
+							final MarkerOptions marker = GetContactDetails(
+									currentContact.phoneNumber,
+									currentContact.distance,
+									currentContact.location);
+
+							Handler handler = new Handler(
+									Looper.getMainLooper());
+							handler.post(new Runnable() {
+
+								@Override
+								public void run() {
+									if (miLoading != null) {
+										miLoading.setVisible(false);
+									}
+									googleMap.addMarker(marker);
+								}
+							});
+
+						}
+					} catch (Exception e) {
+						Log.e("WeMeet_Exception", "");
+					}
+				}
+			}
+		};
+
+		updateTimer.schedule(task, 0, UPDATE_DELAY);
 	}
 }
