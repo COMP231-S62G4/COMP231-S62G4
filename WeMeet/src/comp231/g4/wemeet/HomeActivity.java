@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import comp231.g4.wemeet.model.NavDrawerItem;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -156,34 +157,45 @@ public class HomeActivity extends Activity {
 	private void displayView(int position) {
 		android.app.FragmentManager fragmentManager = getFragmentManager();
 
+		Fragment fragment = null;
 		// update the main content by replacing fragments
 		switch (position) {
 		case 0:
-			currentFragment = friendsNearbyFragment;
+			fragment = friendsNearbyFragment;
 			break;
 		case 1:
-			currentFragment = contactsFragment;
+			fragment = contactsFragment;
 			break;
 		case 2:
-			currentFragment = locationRequestsFragment;
+			fragment = locationRequestsFragment;
 			break;
 		case 3:
-			currentFragment = groupsFragment;
+			fragment = groupsFragment;
 			break;
 		case 4:
-			currentFragment = settingsFragment;
+			fragment = settingsFragment;
 			break;
 		case 5:
-			currentFragment = deleteAccountFragment;
+			fragment = deleteAccountFragment;
 			break;
 		default:
 			break;
 		}
 
-		if (currentFragment != null) {
+		if (fragment != null) {
+			if (currentFragment != null && currentFragment != fragment) {
+				fragmentManager.beginTransaction().remove(currentFragment)
+						.commit();
+				
+				fragmentManager.beginTransaction()
+						.replace(R.id.content_frame, fragment).commit();
 
-			fragmentManager.beginTransaction()
-					.replace(R.id.content_frame, currentFragment).commit();
+			} else if (currentFragment == null) {
+				fragmentManager.beginTransaction()
+						.replace(R.id.content_frame, fragment).commit();
+			}
+
+			currentFragment = fragment;
 
 			// update selected item and title, then close the drawer
 			mDrawerList.setItemChecked(position, true);
@@ -241,7 +253,7 @@ public class HomeActivity extends Activity {
 			// TODO: handle exception
 		}
 	}
-	
+
 	@Override
 	protected void onStop() {
 		try {
@@ -251,7 +263,7 @@ public class HomeActivity extends Activity {
 			// TODO: handle exception
 		}
 	}
-	
+
 	@Override
 	protected void onDestroy() {
 		try {

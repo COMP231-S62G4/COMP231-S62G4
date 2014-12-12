@@ -22,7 +22,6 @@ import comp231.g4.wemeet.helpers.ValidationHelper;
 import comp231.g4.wemeet.model.NearbyContact;
 import comp231.g4.wemeet.servicehelper.AndroidClient;
 import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -58,25 +57,23 @@ public class FriendsNearByFragment extends Fragment implements
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.activity_friends_nearby, null);
+		mapFragment = ((MapFragment) getFragmentManager().findFragmentById(
+				R.id.map));
+		View v;
+		if (mapFragment == null) {
+			v = inflater.inflate(R.layout.activity_friends_nearby, null);
+		} else {
+			v = mapFragment.getView().getRootView();
+		}
+		return v;
 	}
 
 	@Override
 	public void onDestroyView() {
-
-		try {
-
-			FragmentTransaction ft = getActivity().getFragmentManager()
-					.beginTransaction();
-			ft.remove(mapFragment).commit();
-		} catch (Exception e) {
-
-		} finally {
-			try {
-				super.onDestroy();
-			} catch (Exception e) {
-				// TODO: handle exception
-			}
+		super.onDestroyView();
+		if (!getActivity().isFinishing() && mapFragment != null) {
+			getFragmentManager().beginTransaction().remove(mapFragment)
+					.commit();
 		}
 	}
 

@@ -57,6 +57,7 @@
         </activity>
         <activity
             android:name=".ViewContactActivity"
+            android:icon="@android:drawable/ic_menu_info_details"
             android:label="Contact details" >
         </activity>
 

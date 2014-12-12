@@ -3,6 +3,14 @@ package comp231.g4.wemeet;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import comp231.g4.wemeet.helpers.ContactFetcher;
 import comp231.g4.wemeet.helpers.RegisteredContactsDataSource;
@@ -10,6 +18,7 @@ import comp231.g4.wemeet.helpers.SharedLocationDataSource;
 import comp231.g4.wemeet.helpers.ValidationHelper;
 import comp231.g4.wemeet.model.Contact;
 import comp231.g4.wemeet.model.ContactPhone;
+import comp231.g4.wemeet.model.NearbyContact;
 import comp231.g4.wemeet.servicehelper.AndroidClient;
 
 import android.app.AlarmManager;
@@ -21,16 +30,25 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
+import android.provider.MediaStore;
+import android.provider.ContactsContract.PhoneLookup;
 import android.util.Log;
+import android.widget.Toast;
 
 public class WeMeetService extends Service implements LocationListener {
 	private Notification notification;
@@ -46,9 +64,6 @@ public class WeMeetService extends Service implements LocationListener {
 				.getDefaultSharedPreferences(WeMeetService.this
 						.getApplicationContext());
 
-		// showing notification
-		showNotification("Service started.");
-
 		// creating instance of client
 		AndroidClient client = new AndroidClient();
 
@@ -57,12 +72,110 @@ public class WeMeetService extends Service implements LocationListener {
 			syncContacts(client); // syncing contacts
 		}
 
+		// find friends nearby
+		locateFriendsNearby();
+
 		// sync shared location list
 		syncSharedLocationList(client);
 
 		setLocationListener(); // updating location on server
 
 		return super.onStartCommand(intent, flags, startId);
+	}
+
+	private void locateFriendsNearby() {
+		Thread t = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					if (isNetworkAvailable()) {
+						List<NearbyContact> contacts = new ArrayList<NearbyContact>();
+
+						AndroidClient client = new AndroidClient();
+
+						JSONArray data = client.GetFriendsNearBy(prefs
+								.getString(MainActivity.KEY_PHONE_NUMBER, ""));
+
+						for (int i = 0; i < data.length(); i++) {
+
+							try {
+								JSONObject individualData = new JSONObject(data
+										.get(i).toString());
+
+								double distance = Double
+										.parseDouble(individualData
+												.getString("Distance"));
+								JSONObject location = individualData
+										.getJSONObject("Location");
+								String phoneNumber = individualData
+										.getString("PhoneNumber");
+
+								LatLng iLocation = new LatLng(location
+										.getDouble("Latitude"), location
+										.getDouble("Longitude"));
+								String lastSeen = location.getString("Date");
+
+								contacts.add(new NearbyContact(phoneNumber,
+										iLocation, distance, lastSeen));
+
+							} catch (Exception e) {
+							}
+						}
+
+						String friendsNearby = "";
+
+						for (int i = 0; i < contacts.size(); i++) {
+
+							NearbyContact currentContact = contacts.get(i);
+
+							String contactName = getContactName(currentContact.phoneNumber);
+							if (contactName != null) {
+								friendsNearby += contactName + ",";
+							}
+						}
+
+						if (friendsNearby.length() > 0) {
+							friendsNearby = friendsNearby.substring(0, friendsNearby.length()-1)+" are nearby you.";
+							showNotification(friendsNearby);
+						}
+					}
+				} catch (Exception e) {
+					Log.e("WeMeet_Exception", "");
+				}
+			}
+
+			private String getContactName(String phoneNumber) {
+				String name = null;
+				String[] columns = { ContactsContract.Contacts.DISPLAY_NAME };
+
+				Uri contactUri = Uri.withAppendedPath(
+						PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
+
+				Cursor cursor = WeMeetService.this.getContentResolver().query(
+						contactUri, columns, null, null, null);
+				if (cursor == null) {
+					return null;
+				}
+				try {
+					int ColumeIndex_DISPLAY_NAME = cursor
+							.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+
+					if (cursor.moveToFirst()) {
+						name = cursor.getString(ColumeIndex_DISPLAY_NAME);
+					}
+
+				} catch (Exception ex) {
+					Log.e("WeMeet_Exception", ex.getMessage());
+				} finally {
+					cursor.close();
+				}
+
+				return name;
+			}
+		});
+
+		t.start();
 	}
 
 	// method to set location listener

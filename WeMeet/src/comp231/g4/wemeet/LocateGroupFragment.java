@@ -89,22 +89,13 @@ public class LocateGroupFragment extends Fragment implements
 
 	@Override
 	public void onDestroyView() {
-
-		try {
-
-			FragmentTransaction ft = getActivity().getFragmentManager()
-					.beginTransaction();
-			ft.remove(mapFragment).commit();
-		} catch (Exception e) {
-
-		} finally {
-			try {
-				super.onDestroy();
-			} catch (Exception e) {
-				// TODO: handle exception
-			}
+		super.onDestroyView();
+		if (!getActivity().isFinishing() && mapFragment != null) {
+			getFragmentManager().beginTransaction().remove(mapFragment)
+					.commit();
 		}
 	}
+
 
 	private void InitializeComponents() {
 		mapFragment = ((MapFragment) getActivity().getFragmentManager()
